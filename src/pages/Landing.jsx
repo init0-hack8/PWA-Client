@@ -11,7 +11,14 @@ function Landing() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      console.log("Logged in as:", user.displayName);
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        createdAt: new Date().toISOString()
+      }, { merge: true });
     } catch (error) {
       console.error("Google login error:", error);
     }
