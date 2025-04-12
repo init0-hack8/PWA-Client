@@ -8,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// import { ThemeToggle } from "../theme-toggle";
 
 const Navbar = () => {
   const navigate = useNavigate();
