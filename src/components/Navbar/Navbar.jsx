@@ -1,60 +1,58 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Avatar, Box, Button, Menu, MenuItem } from '@mui/material';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+// import { ThemeToggle } from "../theme-toggle";
 
 const Navbar = () => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-  const navigate = useNavigate(); 
-
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  const navigate = useNavigate();
 
   const handleMenuItemClick = (option) => {
-    handleMenuClose();
-
     if (option === 'profile') {
       navigate('/profile');
     } else if (option === 'logout') {
-      
-      localStorage.removeItem('token'); 
+      localStorage.removeItem('token');
       navigate('/login');
     }
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: '#333' }}>
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          Hack 8
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Button
-            color="inherit"
-            onClick={handleMenuClick}
-            sx={{ display: 'flex', alignItems: 'center' }}
-          >
-            <Avatar alt="User Profile" src="/path-to-avatar.jpg" sx={{ mr: 1 }} />
-            John Doe
-          </Button>
-
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={() => handleMenuItemClick('profile')}>Profile</MenuItem>
-            <MenuItem onClick={() => handleMenuItemClick('logout')}>Logout</MenuItem>
-          </Menu>
-        </Box>
-      </Toolbar>
-    </AppBar>
+    <nav className="border-b bg-background">
+      <div className="container flex h-16 items-center px-4">
+        <div className="mr-4 hidden md:flex">
+          <h2 className="text-lg font-semibold">Hack 8</h2>
+        </div>
+        
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          <ThemeToggle />
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src="/path-to-avatar.jpg" alt="User" />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleMenuItemClick('profile')}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleMenuItemClick('logout')}>
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </nav>
   );
 };
 
