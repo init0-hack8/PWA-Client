@@ -25,8 +25,12 @@ import {
   Bookmark, 
   Send, 
   Settings, 
-  Image as ImageIcon 
+  Image as ImageIcon,
+  Shirt
 } from 'lucide-react';
+import FashionDashboard from '@/pages/fashion/FashionDashboard';
+import FashionForecast from '@/components/fashion/FashionForecast';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function SocialMediaApp() {
   const [activeTab, setActiveTab] = useState('home');
@@ -387,6 +391,7 @@ export default function SocialMediaApp() {
   const IconSend = () => <Send className="w-5 h-5 text-foreground" />;
   const IconSettings = () => <Settings className="w-5 h-5 text-foreground" />;
   const IconGallery = () => <ImageIcon className="w-5 h-5 text-foreground" />;
+  const IconShirt = () => <Shirt className="w-5 h-5 text-foreground" />;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -412,22 +417,21 @@ export default function SocialMediaApp() {
       {/* Top Header */}
       <div className="bg-background p-4 flex justify-between items-center sticky top-0 z-10 border-b">
         <h1 className="text-2xl font-bold text-primary">SocialApp</h1>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setNewPostDialog(true)}>
-            <IconCamera />
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" onClick={() => setNewPostDialog(true)} className="flex items-center justify-center w-10 h-10">
+            <IconCamera className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setActiveTab('notifications')}>
-            <div className="relative">
-              <IconBell />
-              {notifications.length > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center"
-                >
-                  {notifications.length}
-                </Badge>
-              )}
-            </div>
+          <ThemeToggle />
+          <Button variant="ghost" size="sm" onClick={() => setActiveTab('notifications')} className="flex items-center justify-center w-10 h-10 relative">
+            <IconBell className="w-5 h-5" />
+            {notifications.length > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
+              >
+                {notifications.length}
+              </Badge>
+            )}
           </Button>
         </div>
       </div>
@@ -660,41 +664,58 @@ export default function SocialMediaApp() {
             </TabsContent>
           </Tabs>
         </TabsContent>
-        
-        {/* Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-2 flex justify-around z-10">
-          <TabsList className="grid w-full grid-cols-4 bg-transparent h-auto gap-1">
-            <TabsTrigger 
-              value="home" 
-              className="flex flex-col items-center data-[state=active]:text-primary py-1 px-0"
-            >
-              <IconHome />
-              <span className="text-xs mt-1">Home</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="search" 
-              className="flex flex-col items-center data-[state=active]:text-primary py-1 px-0"
-            >
-              <IconSearch />
-              <span className="text-xs mt-1">Search</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="notifications" 
-              className="flex flex-col items-center data-[state=active]:text-primary py-1 px-0"
-            >
-              <IconBell />
-              <span className="text-xs mt-1">Alerts</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="profile" 
-              className="flex flex-col items-center data-[state=active]:text-primary py-1 px-0"
-            >
-              <IconUser />
-              <span className="text-xs mt-1">Profile</span>
-            </TabsTrigger>
-          </TabsList>
-        </div>
       </Tabs>
+      
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t">
+        <div className="flex justify-around items-center h-16 px-4 max-w-screen-xl mx-auto">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setActiveTab('home')} 
+            className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'home' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <IconHome className="w-5 h-5" />
+            <span className="text-xs">Home</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setActiveTab('search')} 
+            className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'search' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <IconSearch className="w-5 h-5" />
+            <span className="text-xs">Search</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setActiveTab('fashion')} 
+            className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'fashion' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <IconShirt className="w-5 h-5" />
+            <span className="text-xs">Fashion</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setActiveTab('notifications')} 
+            className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'notifications' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <IconBell className="w-5 h-5" />
+            <span className="text-xs">Alerts</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setActiveTab('profile')} 
+            className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'profile' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <IconUser className="w-5 h-5" />
+            <span className="text-xs">Profile</span>
+          </Button>
+        </div>
+      </div>
       
       {/* Comment Dialog */}
       <Dialog open={commentDialog} onOpenChange={setCommentDialog}>
@@ -831,6 +852,12 @@ export default function SocialMediaApp() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {activeTab === 'fashion' && (
+        <div className="pb-16">
+          <FashionDashboard />
+        </div>
+      )}
     </div>
   );
 }

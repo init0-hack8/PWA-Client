@@ -1,0 +1,44 @@
+.slider-root {
+  position: relative;
+  display: flex;
+  width: 100%;
+  touch-action: none;
+  user-select: none;
+  align-items: center;
+}
+
+.slider-track {
+  position: relative;
+  height: 8px;
+  width: 100%;
+  flex-grow: 1;
+  overflow: hidden;
+  border-radius: 9999px;
+  background-color: #e5e7eb;
+}
+
+.slider-range {
+  position: absolute;
+  height: 100%;
+  background-color: #3b82f6;
+}
+
+.slider-thumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #3b82f6;
+  background-color: white;
+  transition: background-color 150ms;
+}
+
+.slider-thumb:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.slider-thumb:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+} 
