@@ -27,42 +27,89 @@ export default function FashionDashboard() {
   const [activeTab, setActiveTab] = useState('style');
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Fashion Sentiment Analysis</h1>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold mb-2">Fashion Sentiment Analysis</h1>
+        <p className="text-muted-foreground">Analyze fashion trends, create moodboards, and forecast upcoming styles</p>
+      </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-3 md:grid-cols-6 gap-2">
-          <TabsTrigger value="style">Style Analysis</TabsTrigger>
-          <TabsTrigger value="moodboard">Moodboard</TabsTrigger>
-          <TabsTrigger value="forecast">Trend Forecast</TabsTrigger>
-          <TabsTrigger value="tryon">Try-On</TabsTrigger>
-          <TabsTrigger value="campaign">Campaign</TabsTrigger>
-          <TabsTrigger value="closet">Closet</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 p-1 bg-muted/50 rounded-lg">
+          <TabsTrigger 
+            value="style" 
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Style Analysis
+          </TabsTrigger>
+          <TabsTrigger 
+            value="moodboard"
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Moodboard
+          </TabsTrigger>
+          <TabsTrigger 
+            value="forecast"
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Trend Forecast
+          </TabsTrigger>
+          <TabsTrigger 
+            value="tryon"
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Try-On
+          </TabsTrigger>
+          <TabsTrigger 
+            value="campaign"
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Campaign
+          </TabsTrigger>
+          <TabsTrigger 
+            value="closet"
+            className="data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Closet
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="style" className="space-y-4">
-          <StyleSentimentChart post={mockPost} />
-        </TabsContent>
+        <div className="pt-8">
+          <TabsContent value="style" className="mt-6">
+            <div className="bg-card rounded-lg p-6 shadow-sm">
+              <StyleSentimentChart post={mockPost} />
+            </div>
+          </TabsContent>
 
-        <TabsContent value="moodboard" className="space-y-4">
-          <BrandMoodboard />
-        </TabsContent>
+          <TabsContent value="moodboard" className="mt-6">
+            <div className="bg-card rounded-lg p-6 shadow-sm">
+              <BrandMoodboard />
+            </div>
+          </TabsContent>
 
-        <TabsContent value="forecast" className="space-y-4">
-          <FashionForecast />
-        </TabsContent>
+          <TabsContent value="forecast" className="mt-6">
+            <div className="bg-card rounded-lg p-6 shadow-sm">
+              <FashionForecast />
+            </div>
+          </TabsContent>
 
-        <TabsContent value="tryon" className="space-y-4">
-          <TryOnMoodFilter />
-        </TabsContent>
+          <TabsContent value="tryon" className="mt-6">
+            <div className="bg-card rounded-lg p-6 shadow-sm">
+              <TryOnMoodFilter />
+            </div>
+          </TabsContent>
 
-        <TabsContent value="campaign" className="space-y-4">
-          <CampaignFeedback />
-        </TabsContent>
+          <TabsContent value="campaign" className="mt-6">
+            <div className="bg-card rounded-lg p-6 shadow-sm">
+              <CampaignFeedback />
+            </div>
+          </TabsContent>
 
-        <TabsContent value="closet" className="space-y-4">
-          <CollaborativeCloset />
-        </TabsContent>
+          <TabsContent value="closet" className="mt-6">
+            <div className="bg-card rounded-lg p-6 shadow-sm">
+              <CollaborativeCloset />
+            </div>
+          </TabsContent>
+        </div>
       </Tabs>
     </div>
   );

@@ -438,12 +438,12 @@ export default function SocialMediaApp() {
 
       {/* Main Content */}
       <Tabs defaultValue="home" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsContent value="home" className="pb-20 p-3 mt-0">
+        <TabsContent value="home" className="pb-20 p-4 mt-0">
           {posts.map(post => (
-            <Card key={post.id} className="mb-4 bg-card text-card-foreground">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Avatar>
+            <Card key={post.id} className="mb-6 bg-card text-card-foreground">
+              <CardHeader className="flex flex-row items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
                     <AvatarImage src={post.avatar} />
                     <AvatarFallback>{post.username[0]}</AvatarFallback>
                   </Avatar>
@@ -472,7 +472,7 @@ export default function SocialMediaApp() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4">
                 <p className="mb-4 text-foreground">{post.content}</p>
                 {post.image && (
                   <img
@@ -482,11 +482,11 @@ export default function SocialMediaApp() {
                   />
                 )}
               </CardContent>
-              <CardFooter className="flex justify-between">
+              <CardFooter className="flex justify-between p-4">
                 <div className="flex gap-4">
                   <button
                     onClick={() => toggleLike(post.id)}
-                    className={`flex items-center gap-1 ${
+                    className={`flex items-center gap-2 ${
                       likedPosts[post.id] ? 'text-blue-500' : 'text-muted-foreground hover:text-blue-500'
                     }`}
                   >
@@ -495,14 +495,14 @@ export default function SocialMediaApp() {
                   </button>
                   <button
                     onClick={() => openCommentDialog(post.id)}
-                    className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-primary"
                   >
                     <IconComment />
                     <span>{post.comments}</span>
                   </button>
                   <button
                     onClick={() => sharePost(post.id)}
-                    className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-primary"
                   >
                     <IconShare />
                   </button>
@@ -510,7 +510,7 @@ export default function SocialMediaApp() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => toggleBookmark(post.id)}
-                    className={`flex items-center gap-1 ${
+                    className={`flex items-center gap-2 ${
                       bookmarkedPosts[post.id] ? 'text-primary' : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
@@ -522,22 +522,22 @@ export default function SocialMediaApp() {
           ))}
         </TabsContent>
         
-        <TabsContent value="search" className="pt-2 pb-20 p-3 mt-0">
-          <div className="mb-4">
+        <TabsContent value="search" className="pt-4 pb-20 p-4 mt-0">
+          <div className="mb-6">
             <div className="relative">
-              <span className="absolute left-2.5 top-2.5 text-muted-foreground">
+              <span className="absolute left-3 top-2.5 text-muted-foreground">
                 🔍
               </span>
               <Input 
                 type="text" 
                 placeholder="Search" 
-                className="pl-8" 
+                className="pl-10" 
                 value={searchQuery}
                 onChange={handleSearch}
               />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-1">
+          <div className="grid grid-cols-3 gap-2">
             {searchResults.map((item) => (
               <div key={item.id} className="aspect-square bg-muted rounded-md overflow-hidden">
                 <img src={item.image} alt="Search result" className="w-full h-full object-cover" />
@@ -546,8 +546,8 @@ export default function SocialMediaApp() {
           </div>
         </TabsContent>
         
-        <TabsContent value="notifications" className="pt-2 pb-20 p-3 mt-0">
-          <div className="flex justify-between items-center mb-4">
+        <TabsContent value="notifications" className="pt-4 pb-20 p-4 mt-0">
+          <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold">Notifications</h2>
             {notifications.length > 0 && (
               <Button variant="ghost" size="sm" onClick={clearAllNotifications}>
@@ -557,16 +557,16 @@ export default function SocialMediaApp() {
           </div>
           
           {notifications.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="flex justify-center mb-2">
+            <div className="text-center py-12">
+              <div className="flex justify-center mb-4">
                 <Bell className="w-12 h-12 text-muted-foreground" />
               </div>
               <p className="text-muted-foreground">No notifications yet</p>
             </div>
           ) : (
             notifications.map((notification) => (
-              <div key={notification.id} className="flex items-center p-3 border-b last:border-0">
-                <Avatar className="h-10 w-10 mr-3">
+              <div key={notification.id} className="flex items-center p-4 border-b last:border-0">
+                <Avatar className="h-10 w-10 mr-4">
                   <AvatarImage src="/api/placeholder/40/40" alt={notification.username || 'User'} />
                   <AvatarFallback>{(notification.username || 'U')[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
@@ -575,12 +575,12 @@ export default function SocialMediaApp() {
                     <span className="font-medium">{notification.username || 'User'}</span>
                     {' '}{notification.message}
                   </p>
-                  <p className="text-xs text-muted-foreground">{notification.timestamp}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{notification.timestamp}</p>
                 </div>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-6 w-6 ml-1" 
+                  className="h-6 w-6 ml-2" 
                   onClick={() => clearNotification(notification.id)}
                 >
                   <IconMore />
@@ -590,50 +590,50 @@ export default function SocialMediaApp() {
           )}
         </TabsContent>
         
-        <TabsContent value="profile" className="pt-2 pb-20 p-3 mt-0">
-          <div className="flex justify-between items-center mb-4">
+        <TabsContent value="profile" className="pt-4 pb-20 p-4 mt-0">
+          <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold">Your Profile</h2>
             <Button variant="ghost" size="sm" onClick={() => setProfileEditDialog(true)}>
               <IconSettings />
             </Button>
           </div>
-          <div className="flex items-center mb-6">
-            <Avatar className="h-20 w-20 mr-4">
+          <div className="flex items-center mb-8">
+            <Avatar className="h-24 w-24 mr-6">
               <AvatarImage src={profile.avatar} alt="Profile" />
               <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-bold text-xl">{profile.fullName}</h3>
-              <p className="text-muted-foreground">@{profile.username}</p>
-              <p className="text-sm my-1">{profile.bio}</p>
+              <h3 className="font-bold text-2xl mb-1">{profile.fullName}</h3>
+              <p className="text-muted-foreground mb-2">@{profile.username}</p>
+              <p className="text-sm mb-2">{profile.bio}</p>
               <Badge variant="outline" className="mt-1">Pro Member</Badge>
             </div>
           </div>
           
-          <div className="flex justify-around mb-6 text-center">
+          <div className="flex justify-around mb-8 text-center">
             <div>
-              <div className="font-bold">{profile.posts}</div>
+              <div className="font-bold text-xl">{profile.posts}</div>
               <div className="text-muted-foreground text-sm">Posts</div>
             </div>
-            <Separator orientation="vertical" className="h-8" />
+            <Separator orientation="vertical" className="h-10" />
             <div>
-              <div className="font-bold">{profile.followers.toLocaleString()}</div>
+              <div className="font-bold text-xl">{profile.followers.toLocaleString()}</div>
               <div className="text-muted-foreground text-sm">Followers</div>
             </div>
-            <Separator orientation="vertical" className="h-8" />
+            <Separator orientation="vertical" className="h-10" />
             <div>
-              <div className="font-bold">{profile.following}</div>
+              <div className="font-bold text-xl">{profile.following}</div>
               <div className="text-muted-foreground text-sm">Following</div>
             </div>
           </div>
           
-          <Tabs defaultValue="posts" className="w-full mb-4">
+          <Tabs defaultValue="posts" className="w-full mb-6">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="posts">Posts</TabsTrigger>
               <TabsTrigger value="saved">Saved</TabsTrigger>
             </TabsList>
-            <TabsContent value="posts" className="mt-2">
-              <div className="grid grid-cols-3 gap-1">
+            <TabsContent value="posts" className="mt-4">
+              <div className="grid grid-cols-3 gap-2">
                 {posts
                   .filter(post => post.username === profile.username)
                   .map(post => (
@@ -643,8 +643,8 @@ export default function SocialMediaApp() {
                   ))}
               </div>
             </TabsContent>
-            <TabsContent value="saved" className="mt-2">
-              <div className="grid grid-cols-3 gap-1">
+            <TabsContent value="saved" className="mt-4">
+              <div className="grid grid-cols-3 gap-2">
                 {posts
                   .filter(post => bookmarkedPosts[post.id])
                   .map(post => (
@@ -653,8 +653,8 @@ export default function SocialMediaApp() {
                     </div>
                   ))}
                 {Object.keys(bookmarkedPosts).filter(id => bookmarkedPosts[id]).length === 0 && (
-                  <div className="col-span-3 text-center py-8">
-                    <div className="flex justify-center mb-2">
+                  <div className="col-span-3 text-center py-12">
+                    <div className="flex justify-center mb-4">
                       <Bookmark className="w-12 h-12 text-muted-foreground" />
                     </div>
                     <p className="text-muted-foreground">No saved posts yet</p>
@@ -668,7 +668,7 @@ export default function SocialMediaApp() {
       
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t">
-        <div className="flex justify-around items-center h-16 px-4 max-w-screen-xl mx-auto">
+        <div className="flex justify-around items-center h-16 px-6 max-w-screen-xl mx-auto">
           <Button 
             variant="ghost" 
             size="sm" 

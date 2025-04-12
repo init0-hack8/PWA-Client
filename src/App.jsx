@@ -5,6 +5,7 @@ import router from './configs/router';
 import ContextProvider from './provider/Context';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { ThemeProvider } from './context/ThemeContext';
+import { Toaster } from 'sonner';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <ThemeProvider>
         <ContextProvider>
           <RouterProvider router={router} />
+          <Toaster position="top-right" richColors />
         </ContextProvider>
       </ThemeProvider>
     </ErrorBoundary>
