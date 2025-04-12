@@ -6,7 +6,6 @@ import Footer from "../components/Footer/Footer";
 function Layout() {
   return (
     <>
-      <Navbar />
       <div className="w-full">
         <div className="container mx-auto">
           <Outlet />

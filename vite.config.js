@@ -9,9 +9,10 @@ export default defineConfig({
     react(),
     VitePWA({
       manifest: {
+        theme_color: "#000000",
         icons: [
           {
-            src: "./logoNew.png",
+            src: "./i0.png",
             sizes: "1024x1024",
             type: "image/png",
             purpose: "any maskable"
