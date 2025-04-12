@@ -11,6 +11,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { 
+  Home, 
+  Search, 
+  Bell, 
+  User, 
+  Heart, 
+  MessageSquare, 
+  Share2, 
+  Camera, 
+  Mail, 
+  MoreHorizontal, 
+  Bookmark, 
+  Send, 
+  Settings, 
+  Image as ImageIcon 
+} from 'lucide-react';
 
 export default function SocialMediaApp() {
   const [activeTab, setActiveTab] = useState('home');
@@ -348,21 +364,29 @@ export default function SocialMediaApp() {
     setNotifications([]);
   };
 
-  // Custom Icon Components using text/emoji
-  const IconHome = () => <span className="text-base">🏠</span>;
-  const IconSearch = () => <span className="text-base">🔍</span>;
-  const IconBell = () => <span className="text-base">🔔</span>;
-  const IconUser = () => <span className="text-base">👤</span>;
-  const IconHeart = ({ filled }) => <span className={`text-base ${filled ? "text-red-500" : ""}`}>❤️</span>;
-  const IconComment = () => <span className="text-base">💬</span>;
-  const IconShare = () => <span className="text-base">↗️</span>;
-  const IconCamera = () => <span className="text-base">📷</span>;
-  const IconMessage = () => <span className="text-base">✉️</span>;
-  const IconMore = () => <span className="text-base">⋯</span>;
-  const IconBookmark = ({ filled }) => <span className={`text-base ${filled ? "text-primary" : ""}`}>🔖</span>;
-  const IconSend = () => <span className="text-base">📤</span>;
-  const IconSettings = () => <span className="text-base">⚙️</span>;
-  const IconGallery = () => <span className="text-base">🖼️</span>;
+  // Custom Icon Components using Lucide React
+  const IconHome = () => <Home className="w-5 h-5 text-foreground" />;
+  const IconSearch = () => <Search className="w-5 h-5 text-foreground" />;
+  const IconBell = () => <Bell className="w-5 h-5 text-foreground" />;
+  const IconUser = () => <User className="w-5 h-5 text-foreground" />;
+  const IconHeart = ({ filled }) => (
+    <Heart 
+      className={`w-5 h-5 ${filled ? "text-red-500 fill-red-500" : "text-foreground"}`} 
+    />
+  );
+  const IconComment = () => <MessageSquare className="w-5 h-5 text-foreground" />;
+  const IconShare = () => <Share2 className="w-5 h-5 text-foreground" />;
+  const IconCamera = () => <Camera className="w-5 h-5 text-foreground" />;
+  const IconMessage = () => <Mail className="w-5 h-5 text-foreground" />;
+  const IconMore = () => <MoreHorizontal className="w-5 h-5 text-foreground" />;
+  const IconBookmark = ({ filled }) => (
+    <Bookmark 
+      className={`w-5 h-5 ${filled ? "text-primary fill-primary" : "text-foreground"}`} 
+    />
+  );
+  const IconSend = () => <Send className="w-5 h-5 text-foreground" />;
+  const IconSettings = () => <Settings className="w-5 h-5 text-foreground" />;
+  const IconGallery = () => <ImageIcon className="w-5 h-5 text-foreground" />;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -530,7 +554,9 @@ export default function SocialMediaApp() {
           
           {notifications.length === 0 ? (
             <div className="text-center py-8">
-              <div className="text-4xl mx-auto mb-2 text-muted-foreground">🔔</div>
+              <div className="flex justify-center mb-2">
+                <Bell className="w-12 h-12 text-muted-foreground" />
+              </div>
               <p className="text-muted-foreground">No notifications yet</p>
             </div>
           ) : (
@@ -624,7 +650,9 @@ export default function SocialMediaApp() {
                   ))}
                 {Object.keys(bookmarkedPosts).filter(id => bookmarkedPosts[id]).length === 0 && (
                   <div className="col-span-3 text-center py-8">
-                    <div className="text-4xl mx-auto mb-2 text-muted-foreground">🔖</div>
+                    <div className="flex justify-center mb-2">
+                      <Bookmark className="w-12 h-12 text-muted-foreground" />
+                    </div>
                     <p className="text-muted-foreground">No saved posts yet</p>
                   </div>
                 )}
