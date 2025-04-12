@@ -53,6 +53,7 @@ export function TryOnMoodFilter() {
   const [loading, setLoading] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [tryOnOutfits, setTryOnOutfits] = useState({}); // Track which outfits are being tried on
 
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
@@ -64,6 +65,13 @@ export function TryOnMoodFilter() {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const toggleTryOn = (outfitId) => {
+    setTryOnOutfits(prev => ({
+      ...prev,
+      [outfitId]: !prev[outfitId]
+    }));
   };
 
   const handleMoodSelect = (mood) => {
@@ -208,29 +216,47 @@ export function TryOnMoodFilter() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {outfits.map((outfit) => (
                 <div key={outfit.id} className="outfit-card">
-                  <div className="relative">
-                    {photoPreview && (
-                      <img
-                        src={photoPreview}
-                        alt="Your photo"
-                        className="w-full h-64 object-cover rounded-lg opacity-50"
+                  <div className="relative h-64 rounded-lg overflow-hidden">
+                    {tryOnOutfits[outfit.id] && photoPreview ? (
+                      <>
+                        <img
+                          src={photoPreview}
+                          alt="Your photo"
+                          className="absolute inset-0 w-full h-full object-cover opacity-50"
+                        />
+                        <img 
+                          src={outfit.image} 
+                          alt={`Outfit for ${selectedMood}`}
+                          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay"
+                          onError={(e) => {
+                            e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,outfit';
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <img 
+                        src={outfit.image} 
+                        alt={`Outfit for ${selectedMood}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,outfit';
+                        }}
                       />
                     )}
-                    <img 
-                      src={outfit.image} 
-                      alt={`Outfit for ${selectedMood}`}
-                      className={`w-full h-64 object-cover rounded-lg ${photoPreview ? 'absolute top-0 left-0 mix-blend-overlay' : ''}`}
-                      onError={(e) => {
-                        e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,outfit';
-                      }}
-                    />
                   </div>
                   <div className="mt-2">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold">${outfit.price}</span>
                       <span className="text-sm">⭐ {outfit.rating}</span>
                     </div>
-                    <Button className="w-full mt-2">Try On</Button>
+                    <Button 
+                      className="w-full mt-2" 
+                      onClick={() => toggleTryOn(outfit.id)}
+                      disabled={!photoPreview}
+                      variant={tryOnOutfits[outfit.id] ? "secondary" : "default"}
+                    >
+                      {tryOnOutfits[outfit.id] ? "Remove Try-On" : "Try On"}
+                    </Button>
                   </div>
                 </div>
               ))}
