@@ -32,6 +32,7 @@ import FashionDashboard from '@/pages/fashion/FashionDashboard';
 import FashionForecast from '@/components/fashion/FashionForecast';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function SocialMediaApp() {
   const location = useLocation();
@@ -139,6 +140,7 @@ export default function SocialMediaApp() {
   
   // Functions
   const showNotification = (message, type = 'info') => {
+    // Add to notifications list (keeping this for the notifications tab)
     const notification = {
       id: Date.now(),
       message,
@@ -147,14 +149,38 @@ export default function SocialMediaApp() {
     };
     setNotifications(prev => [notification, ...prev]);
     
-    // Show temporary alert
-    setAlert({ show: true, message, type });
-    setTimeout(() => setAlert({ show: false, message: '', type: '' }), 5000);
+    // Show toast notification instead of alert
+    switch (type) {
+      case 'success':
+        toast.success(message);
+        break;
+      case 'error':
+        toast.error(message);
+        break;
+      case 'warning':
+        toast.warning(message);
+        break;
+      default:
+        toast.info(message);
+        break;
+    }
   };
   
   const showAlert = (message, type = 'info') => {
-    setAlert({ show: true, message, type });
-    setTimeout(() => setAlert({ show: false, message: '', type: '' }), 5000);
+    switch (type) {
+      case 'success':
+        toast.success(message);
+        break;
+      case 'error':
+        toast.error(message);
+        break;
+      case 'warning':
+        toast.warning(message);
+        break;
+      default:
+        toast.info(message);
+        break;
+    }
   };
   
   const toggleLike = (postId) => {
@@ -390,7 +416,7 @@ export default function SocialMediaApp() {
       className={`w-5 h-5 ${filled ? "text-red-500 fill-red-500" : "text-foreground"}`} 
     />
   );
-  const IconComment = () => <MessageSquare className="w-5 h-5 text-foreground" />;
+  const IconComment = () => <MessageSquare className="w-5 h-5 text-primary" />;
   const IconShare = () => <Share2 className="w-5 h-5 text-foreground" />;
   const IconCamera = () => <Camera className="w-5 h-5 text-foreground" />;
   const IconMessage = () => <Mail className="w-5 h-5 text-foreground" />;
@@ -519,7 +545,7 @@ export default function SocialMediaApp() {
                     </button>
                     <button
                       onClick={() => openCommentDialog(post.id)}
-                      className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                      className="flex items-center gap-1 text-foreground hover:text-primary"
                     >
                       <IconComment />
                       <span className="text-sm">{post.comments}</span>
@@ -742,8 +768,214 @@ export default function SocialMediaApp() {
             <IconBell className="w-5 h-5" />
             <span className="text-xs">Notifications</span>
           </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => handleTabChange('profile')} 
+            className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'profile' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <IconUser className="w-5 h-5" />
+            <span className="text-xs">Profile</span>
+          </Button>
         </div>
       </nav>
+
+      {/* Profile Edit Dialog */}
+      {profileEditDialog && (
+        <Dialog open={profileEditDialog} onOpenChange={setProfileEditDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Profile</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={profile.avatar} alt="Profile" />
+                  <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <Button variant="outline" size="sm">
+                    <IconGallery className="mr-2 h-4 w-4" />
+                    Change Picture
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="fullName" className="text-right text-sm font-medium">
+                  Name
+                </label>
+                <Input
+                  id="fullName"
+                  defaultValue={profile.fullName}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="username" className="text-right text-sm font-medium">
+                  Username
+                </label>
+                <Input
+                  id="username"
+                  defaultValue={profile.username}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="bio" className="text-right text-sm font-medium">
+                  Bio
+                </label>
+                <Textarea
+                  id="bio"
+                  defaultValue={profile.bio}
+                  className="col-span-3"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setProfileEditDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => updateProfile({
+                fullName: document.getElementById('fullName').value,
+                username: document.getElementById('username').value,
+                bio: document.getElementById('bio').value
+              })}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* New Post Dialog */}
+      <Dialog open={newPostDialog} onOpenChange={setNewPostDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Create New Post</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Textarea 
+              placeholder="What's on your mind?"
+              value={newPostContent}
+              onChange={(e) => setNewPostContent(e.target.value)}
+              className="min-h-[100px]"
+            />
+            
+            <div className="flex justify-between items-center">
+              <label className="cursor-pointer">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageSelect} 
+                  className="hidden" 
+                />
+                <div className="flex items-center gap-2 text-primary hover:text-primary/80">
+                  <IconGallery className="h-5 w-5" />
+                  <span>Add Photo</span>
+                </div>
+              </label>
+              
+              {selectedImage && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => {
+                    setSelectedImage(null);
+                    setImagePreview(null);
+                  }}
+                  className="text-destructive hover:text-destructive/80"
+                >
+                  Remove Photo
+                </Button>
+              )}
+            </div>
+            
+            {imagePreview && (
+              <div className="relative mt-2 rounded-lg overflow-hidden">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  className="w-full h-auto max-h-[300px] object-contain bg-muted"
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setNewPostContent('');
+              setSelectedImage(null);
+              setImagePreview(null);
+              setNewPostDialog(false);
+            }}>
+              Cancel
+            </Button>
+            <Button onClick={createNewPost} disabled={newPostContent.trim() === '' && !selectedImage}>
+              Post
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Comment Dialog */}
+      <Dialog open={commentDialog} onOpenChange={setCommentDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Comments</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[300px] overflow-y-auto">
+            {currentPostId && comments[currentPostId] && comments[currentPostId].length > 0 ? (
+              <div className="space-y-4 mb-4">
+                {comments[currentPostId].map(comment => (
+                  <div key={comment.id} className="flex gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>{comment.username[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-baseline gap-2">
+                        <p className="font-semibold text-sm">@{comment.username}</p>
+                        <span className="text-xs text-muted-foreground">{comment.time}</span>
+                      </div>
+                      <p className="text-sm">{comment.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-4 text-center text-muted-foreground text-sm">
+                No comments yet. Be the first to comment!
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2 pt-4">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={profile.avatar} />
+              <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 flex items-center gap-2">
+              <Input 
+                placeholder="Add a comment..." 
+                value={newComment} 
+                onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    addComment();
+                  }
+                }}
+              />
+              <Button 
+                size="sm" 
+                onClick={addComment} 
+                disabled={newComment.trim() === ''}
+              >
+                <IconSend />
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
