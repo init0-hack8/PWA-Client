@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import Landing from "../pages/Landing";
 import Layout from "../pages/Layout";
+import SocialMediaApp from "../pages/Page";
 
 const router=createBrowserRouter([
     {
@@ -28,6 +29,10 @@ const router=createBrowserRouter([
                 <h1>Login Page</h1>
             </>
         )
+    },
+    {
+        path:"/social",
+        element: <SocialMediaApp />
     },
     {
         path:"*",
