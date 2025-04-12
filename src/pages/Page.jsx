@@ -48,9 +48,9 @@ export default function SocialMediaApp() {
       id: 1,
       username: 'sarah_designs',
       fullName: 'Sarah Johnson',
-      avatar: '/api/placeholder/40/40',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
       content: 'Just finished my latest UI design project! So excited to share it with everyone soon.',
-      image: '/api/placeholder/400/250',
+      image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=500&fit=crop',
       likes: 124,
       comments: 18,
       time: '2h'
@@ -59,9 +59,9 @@ export default function SocialMediaApp() {
       id: 2,
       username: 'tech_dave',
       fullName: 'Dave Williams',
-      avatar: '/api/placeholder/40/40',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
       content: 'Attended an amazing workshop on React performance optimizations today. Here are some highlights from the event!',
-      image: '/api/placeholder/400/250',
+      image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=500&fit=crop',
       likes: 89,
       comments: 12,
       time: '4h'
@@ -70,9 +70,9 @@ export default function SocialMediaApp() {
       id: 3,
       username: 'travel_with_emma',
       fullName: 'Emma Chen',
-      avatar: '/api/placeholder/40/40',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop',
       content: 'Sunrise hike in the mountains this morning. Worth waking up at 5am!',
-      image: '/api/placeholder/400/250',
+      image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&h=500&fit=crop',
       likes: 243,
       comments: 36,
       time: '6h'
@@ -104,10 +104,20 @@ export default function SocialMediaApp() {
   
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState(Array(12).fill(null).map((_, i) => ({
-    id: i,
-    image: `/api/placeholder/${150}/${150}`
-  })));
+  const [searchResults, setSearchResults] = useState([
+    { id: 1, image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop', category: 'business' },
+    { id: 2, image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=300&fit=crop', category: 'technology' },
+    { id: 3, image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop', category: 'nature' },
+    { id: 4, image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=300&h=300&fit=crop', category: 'design' },
+    { id: 5, image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=300&h=300&fit=crop', category: 'pets' },
+    { id: 6, image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop', category: 'people' },
+    { id: 7, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop', category: 'portrait' },
+    { id: 8, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop', category: 'portrait' },
+    { id: 9, image: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&h=300&fit=crop', category: 'profile' },
+    { id: 10, image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop', category: 'business' },
+    { id: 11, image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=300&fit=crop', category: 'technology' },
+    { id: 12, image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop', category: 'nature' }
+  ]);
   
   // Notification state
   const [notifications, setNotifications] = useState([]);
@@ -117,11 +127,21 @@ export default function SocialMediaApp() {
     username: 'your_username',
     fullName: 'Your Name',
     bio: 'Digital creator and photography enthusiast',
-    avatar: '/api/placeholder/80/80',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
     posts: 248,
     followers: 12400,
     following: 142,
-    images: Array(9).fill(null).map((_, i) => ({ id: i, src: `/api/placeholder/${150}/${150}` }))
+    images: [
+      'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=300&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop'
+    ]
   });
   
   // Following state (for follow/unfollow functionality)
@@ -317,7 +337,7 @@ export default function SocialMediaApp() {
       fullName: profile.fullName,
       avatar: profile.avatar,
       content: newPostContent,
-      image: selectedImage ? imagePreview : '/api/placeholder/400/250',
+      image: imagePreview || null,
       likes: 0,
       comments: 0,
       time: 'Just now'
@@ -348,21 +368,53 @@ export default function SocialMediaApp() {
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
     
-    // Simulate search results - in a real app this would query backend
+    // Simulate search results with different images based on query
     if (e.target.value.trim() !== '') {
-      setSearchResults(
-        Array(Math.floor(Math.random() * 8) + 4).fill(null).map((_, i) => ({
-          id: i,
-          image: `/api/placeholder/${150}/${150}`
-        }))
-      );
+      const query = e.target.value.toLowerCase();
+      const filteredResults = [
+        { id: 1, image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop', category: 'business' },
+        { id: 2, image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=300&fit=crop', category: 'technology' },
+        { id: 3, image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop', category: 'nature' },
+        { id: 4, image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=300&h=300&fit=crop', category: 'design' },
+        { id: 5, image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=300&h=300&fit=crop', category: 'pets' },
+        { id: 6, image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop', category: 'people' },
+        { id: 7, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop', category: 'portrait' },
+        { id: 8, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop', category: 'portrait' },
+        { id: 9, image: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&h=300&fit=crop', category: 'profile' },
+        { id: 10, image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop', category: 'business' },
+        { id: 11, image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=300&fit=crop', category: 'technology' },
+        { id: 12, image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop', category: 'nature' }
+      ].filter(result => result.category.includes(query));
+      
+      setSearchResults(filteredResults.length > 0 ? filteredResults : [
+        { id: 1, image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop', category: 'business' },
+        { id: 2, image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=300&fit=crop', category: 'technology' },
+        { id: 3, image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop', category: 'nature' },
+        { id: 4, image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=300&h=300&fit=crop', category: 'design' },
+        { id: 5, image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=300&h=300&fit=crop', category: 'pets' },
+        { id: 6, image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop', category: 'people' },
+        { id: 7, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop', category: 'portrait' },
+        { id: 8, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop', category: 'portrait' },
+        { id: 9, image: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&h=300&fit=crop', category: 'profile' },
+        { id: 10, image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop', category: 'business' },
+        { id: 11, image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=300&fit=crop', category: 'technology' },
+        { id: 12, image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop', category: 'nature' }
+      ]);
     } else {
-      setSearchResults(
-        Array(12).fill(null).map((_, i) => ({
-          id: i,
-          image: `/api/placeholder/${150}/${150}`
-        }))
-      );
+      setSearchResults([
+        { id: 1, image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop', category: 'business' },
+        { id: 2, image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=300&fit=crop', category: 'technology' },
+        { id: 3, image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop', category: 'nature' },
+        { id: 4, image: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=300&h=300&fit=crop', category: 'design' },
+        { id: 5, image: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=300&h=300&fit=crop', category: 'pets' },
+        { id: 6, image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop', category: 'people' },
+        { id: 7, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop', category: 'portrait' },
+        { id: 8, image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop', category: 'portrait' },
+        { id: 9, image: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&h=300&fit=crop', category: 'profile' },
+        { id: 10, image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&h=300&fit=crop', category: 'business' },
+        { id: 11, image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=300&fit=crop', category: 'technology' },
+        { id: 12, image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=300&h=300&fit=crop', category: 'nature' }
+      ]);
     }
   };
   
@@ -494,7 +546,7 @@ export default function SocialMediaApp() {
                 <CardHeader className="flex flex-row items-center justify-between p-2">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={post.avatar} />
+                      <AvatarImage src={post.avatar} alt={post.username} />
                       <AvatarFallback>{post.username[0]}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -525,11 +577,13 @@ export default function SocialMediaApp() {
                 <CardContent className="p-2">
                   <p className="mb-2 text-foreground text-sm">{post.content}</p>
                   {post.image && (
-                    <img
-                      src={post.image}
-                      alt="Post"
-                      className="w-full rounded-lg"
-                    />
+                    <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden">
+                      <img
+                        src={post.image}
+                        alt="Post"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    </div>
                   )}
                 </CardContent>
                 <CardFooter className="flex justify-between p-2">
@@ -591,8 +645,12 @@ export default function SocialMediaApp() {
             </div>
             <div className="grid grid-cols-3 gap-1">
               {searchResults.map((item) => (
-                <div key={item.id} className="aspect-square bg-muted rounded-md overflow-hidden">
-                  <img src={item.image} alt="Search result" className="w-full h-full object-cover" />
+                <div key={item.id} className="aspect-square rounded-md overflow-hidden">
+                  <img 
+                    src={item.image} 
+                    alt="Search result" 
+                    className="w-full h-full object-cover" 
+                  />
                 </div>
               ))}
             </div>
