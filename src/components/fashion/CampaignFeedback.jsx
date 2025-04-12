@@ -12,6 +12,14 @@ import {
   Heart, 
   MessageSquare 
 } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const mockCampaigns = [
   {
@@ -25,31 +33,98 @@ const mockCampaigns = [
       neutral: 45,
     },
     emotions: {
-      empowering: 65,
-      casual: 45,
-      bold: 55,
-      romantic: 40,
+      empowering: 0,
+      casual: 0,
+      bold: 0,
+      romantic: 0,
     },
-    comments: [
-      { id: 1, user: 'fashionista123', text: 'Love the empowering vibes!', emotion: 'empowering' },
-      { id: 2, user: 'stylequeen', text: 'The bold colors are amazing!', emotion: 'bold' },
-    ],
+    comments: [],
   },
+];
+
+const SENTIMENTS = [
+  { value: 'empowering', label: 'Empowering' },
+  { value: 'casual', label: 'Casual' },
+  { value: 'bold', label: 'Bold' },
+  { value: 'romantic', label: 'Romantic' },
 ];
 
 export function CampaignFeedback() {
   const [selectedCampaign, setSelectedCampaign] = useState(mockCampaigns[0]);
   const [newComment, setNewComment] = useState('');
+  const [selectedSentiment, setSelectedSentiment] = useState('');
+  const [userReaction, setUserReaction] = useState(null);
+
+  const handleCommentSubmit = () => {
+    if (newComment.trim() && selectedSentiment) {
+      const newCommentObj = {
+        id: Date.now(),
+        user: 'current_user',
+        text: newComment.trim(),
+        emotion: selectedSentiment
+      };
+      
+      setSelectedCampaign(prev => {
+        const updatedEmotions = { ...prev.emotions };
+        
+        // Update emotion values
+        if (selectedSentiment && updatedEmotions.hasOwnProperty(selectedSentiment)) {
+          updatedEmotions[selectedSentiment] = Math.min(100, updatedEmotions[selectedSentiment] + 25);
+        }
+        
+        return {
+          ...prev,
+          emotions: updatedEmotions,
+          comments: [...prev.comments, newCommentObj]
+        };
+      });
+      
+      setNewComment('');
+      setSelectedSentiment('');
+      toast.success('Comment added successfully');
+    } else {
+      toast.error('Please add both comment and sentiment');
+    }
+  };
 
   const handleUpload = (e) => {
     // Handle file upload logic here
     console.log('File uploaded:', e.target.files[0]);
   };
 
-  const handleCommentSubmit = () => {
-    if (newComment.trim()) {
-      // Add comment logic here
-      setNewComment('');
+  const handleReaction = (reaction) => {
+    if (userReaction === reaction) {
+      // Remove reaction
+      setUserReaction(null);
+      setSelectedCampaign(prev => ({
+        ...prev,
+        reactions: {
+          ...prev.reactions,
+          [reaction]: prev.reactions[reaction] - 1
+        }
+      }));
+      toast.info('Reaction removed');
+    } else {
+      // Add new reaction
+      if (userReaction) {
+        // Remove previous reaction
+        setSelectedCampaign(prev => ({
+          ...prev,
+          reactions: {
+            ...prev.reactions,
+            [userReaction]: prev.reactions[userReaction] - 1
+          }
+        }));
+      }
+      setUserReaction(reaction);
+      setSelectedCampaign(prev => ({
+        ...prev,
+        reactions: {
+          ...prev.reactions,
+          [reaction]: prev.reactions[reaction] + 1
+        }
+      }));
+      toast.success(`Added ${reaction} reaction`);
     }
   };
 
@@ -86,14 +161,28 @@ export function CampaignFeedback() {
                 />
                 <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
                   <div className="flex gap-2">
-                    <Badge variant="secondary">
-                      <ThumbsUp className="w-3 h-3 mr-1" />
-                      {selectedCampaign.reactions.positive}
-                    </Badge>
-                    <Badge variant="secondary">
-                      <ThumbsDown className="w-3 h-3 mr-1" />
-                      {selectedCampaign.reactions.negative}
-                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`flex items-center gap-1 ${
+                        userReaction === 'positive' ? 'text-green-500' : 'text-muted-foreground'
+                      }`}
+                      onClick={() => handleReaction('positive')}
+                    >
+                      <ThumbsUp className="w-4 h-4" />
+                      <span>{selectedCampaign.reactions.positive}</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`flex items-center gap-1 ${
+                        userReaction === 'negative' ? 'text-red-500' : 'text-muted-foreground'
+                      }`}
+                      onClick={() => handleReaction('negative')}
+                    >
+                      <ThumbsDown className="w-4 h-4" />
+                      <span>{selectedCampaign.reactions.negative}</span>
+                    </Button>
                   </div>
                   <Badge variant="secondary">
                     <MessageSquare className="w-3 h-3 mr-1" />
@@ -133,14 +222,34 @@ export function CampaignFeedback() {
                   </div>
                 ))}
 
-                <div className="flex gap-2">
-                  <Textarea
-                    placeholder="Add your comment..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    className="text-foreground"
-                  />
-                  <Button onClick={handleCommentSubmit}>Send</Button>
+                <div className="flex flex-col gap-4">
+                  <div className="flex gap-4">
+                    <Textarea
+                      placeholder="Add your comment..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      className="text-foreground flex-1"
+                    />
+                    <Select value={selectedSentiment} onValueChange={setSelectedSentiment}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select sentiment" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SENTIMENTS.map((sentiment) => (
+                          <SelectItem key={sentiment.value} value={sentiment.value}>
+                            {sentiment.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    onClick={handleCommentSubmit}
+                    disabled={!newComment.trim() || !selectedSentiment}
+                    className="self-end"
+                  >
+                    Send
+                  </Button>
                 </div>
               </div>
             </div>
