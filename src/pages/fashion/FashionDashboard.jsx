@@ -112,5 +112,6 @@ export default function FashionDashboard() {
         </div>
       </Tabs>
     </div>
+    
   );
 } 

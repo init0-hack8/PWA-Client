@@ -416,12 +416,16 @@ export default function SocialMediaApp() {
 
       {/* Top Header */}
       <div className="bg-background p-4 flex justify-between items-center sticky top-0 z-10 border-b">
-        <h1 className="text-2xl font-bold text-primary">SocialApp</h1>
         <div className="flex items-center space-x-4">
+          <h1 className="text-2xl font-bold text-primary">SocialApp</h1>
+          <div className="pl-7">
+            <ThemeToggle />
+          </div>
+        </div>
+        <div className="flex items-center space-x-4 pr-12">
           <Button variant="ghost" size="sm" onClick={() => setNewPostDialog(true)} className="flex items-center justify-center w-10 h-10">
             <IconCamera className="w-5 h-5" />
           </Button>
-          <ThemeToggle />
           <Button variant="ghost" size="sm" onClick={() => setActiveTab('notifications')} className="flex items-center justify-center w-10 h-10 relative">
             <IconBell className="w-5 h-5" />
             {notifications.length > 0 && (
