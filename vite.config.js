@@ -10,6 +10,8 @@ export default defineConfig({
     VitePWA({
       manifest: {
         theme_color: "#000000",
+        name: "init0",
+        short_name: "i0",
         icons: [
           {
             src: "./i0.png",
