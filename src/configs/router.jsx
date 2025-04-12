@@ -1,17 +1,34 @@
 import { createBrowserRouter } from "react-router-dom";
 import SocialMediaApp from "../pages/Page";
+import Layout from "../pages/Layout";
 
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <SocialMediaApp />,
+        element: <Layout />,
         children: [
             {
                 path: '/',
                 element: <SocialMediaApp />
             },
             {
-                path: '/social',
+                path: '/home',
+                element: <SocialMediaApp />
+            },
+            {
+                path: '/search',
+                element: <SocialMediaApp />
+            },
+            {
+                path: '/fashion',
+                element: <SocialMediaApp />
+            },
+            {
+                path: '/notifications',
+                element: <SocialMediaApp />
+            },
+            {
+                path: '/profile',
                 element: <SocialMediaApp />
             }
         ]

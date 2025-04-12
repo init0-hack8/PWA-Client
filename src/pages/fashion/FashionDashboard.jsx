@@ -6,7 +6,6 @@ import FashionForecast from '@/components/fashion/FashionForecast';
 import { TryOnMoodFilter } from '@/components/fashion/TryOnMoodFilter';
 import { CampaignFeedback } from '@/components/fashion/CampaignFeedback';
 import { CollaborativeCloset } from '@/components/fashion/CollaborativeCloset';
-import { BottomNav } from '@/components/BottomNav';
 
 const mockPost = {
   id: 1,
@@ -28,9 +27,9 @@ export default function FashionDashboard() {
   const [activeTab, setActiveTab] = useState('style');
 
   return (
-    <div className="relative min-h-screen pb-20"> {/* Makes space for fixed BottomNav */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="mb-10">
+    <div className="relative min-h-screen pb-20">
+      <div className="container mx-auto px-4 pt-2 max-w-7xl">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Fashion Sentiment Analysis</h1>
           <p className="text-muted-foreground">
             Analyze fashion trends, create moodboards, and forecast upcoming styles
@@ -59,38 +58,38 @@ export default function FashionDashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <div className="pt-8">
-            <TabsContent value="style" className="mt-6">
+          <div className="pt-4">
+            <TabsContent value="style" className="mt-4">
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <StyleSentimentChart post={mockPost} />
               </div>
             </TabsContent>
 
-            <TabsContent value="moodboard" className="mt-6">
+            <TabsContent value="moodboard" className="mt-4">
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <BrandMoodboard />
               </div>
             </TabsContent>
 
-            <TabsContent value="forecast" className="mt-6">
+            <TabsContent value="forecast" className="mt-4">
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <FashionForecast />
               </div>
             </TabsContent>
 
-            <TabsContent value="tryon" className="mt-6">
+            <TabsContent value="tryon" className="mt-4">
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <TryOnMoodFilter />
               </div>
             </TabsContent>
 
-            <TabsContent value="campaign" className="mt-6">
+            <TabsContent value="campaign" className="mt-4">
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <CampaignFeedback />
               </div>
             </TabsContent>
 
-            <TabsContent value="closet" className="mt-6">
+            <TabsContent value="closet" className="mt-4">
               <div className="bg-card rounded-lg p-6 shadow-sm">
                 <CollaborativeCloset />
               </div>
@@ -98,8 +97,6 @@ export default function FashionDashboard() {
           </div>
         </Tabs>
       </div>
-
-      <BottomNav />
     </div>
   );
 }

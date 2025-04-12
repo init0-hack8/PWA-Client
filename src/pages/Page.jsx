@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -31,9 +31,15 @@ import {
 import FashionDashboard from '@/pages/fashion/FashionDashboard';
 import FashionForecast from '@/components/fashion/FashionForecast';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function SocialMediaApp() {
-  const [activeTab, setActiveTab] = useState('home');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(() => {
+    const path = location.pathname.replace('/', '');
+    return path || 'home';
+  });
   const [likedPosts, setLikedPosts] = useState({});
   const [bookmarkedPosts, setBookmarkedPosts] = useState({});
   const [posts, setPosts] = useState([
@@ -124,6 +130,12 @@ export default function SocialMediaApp() {
   const [alert, setAlert] = useState({ show: false, message: '', type: '' });
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  
+  // Update activeTab when location changes
+  useEffect(() => {
+    const path = location.pathname.replace('/', '');
+    setActiveTab(path || 'home');
+  }, [location.pathname]);
   
   // Functions
   const showNotification = (message, type = 'info') => {
@@ -393,6 +405,11 @@ export default function SocialMediaApp() {
   const IconGallery = () => <ImageIcon className="w-5 h-5 text-foreground" />;
   const IconShirt = () => <Shirt className="w-5 h-5 text-foreground" />;
 
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    navigate(`/${tab === 'home' ? '' : tab}`);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Notifications/Alerts Section */}
@@ -414,269 +431,285 @@ export default function SocialMediaApp() {
         )}
       </div>
 
-      {/* Top Header */}
-      <div className="bg-background p-4 flex justify-between items-center sticky top-0 z-10 border-b">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-bold text-primary">SocialApp</h1>
-          <div className="pl-7">
-            <ThemeToggle />
-          </div>
-        </div>
-        <div className="flex items-center space-x-4 pr-12">
-          <Button variant="ghost" size="sm" onClick={() => setNewPostDialog(true)} className="flex items-center justify-center w-10 h-10">
-            <IconCamera className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setActiveTab('notifications')} className="flex items-center justify-center w-10 h-10 relative">
-            <IconBell className="w-5 h-5" />
-            {notifications.length > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
-              >
-                {notifications.length}
-              </Badge>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <Tabs defaultValue="home" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsContent value="home" className="pb-20 p-4 mt-0">
-          {posts.map(post => (
-            <Card key={post.id} className="mb-6 bg-card text-card-foreground">
-              <CardHeader className="flex flex-row items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={post.avatar} />
-                    <AvatarFallback>{post.username[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold text-foreground">{post.fullName}</p>
-                    <p className="text-sm text-muted-foreground">@{post.username}</p>
-                  </div>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="text-foreground hover:text-primary">
-                    <IconMore />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-popover text-popover-foreground">
-                    <DropdownMenuItem 
-                      onClick={() => toggleFollow(post.username)}
-                      className={following[post.username] ? 'text-primary' : ''}
-                    >
-                      {following[post.username] ? 'Unfollow' : 'Follow'} @{post.username}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => deletePost(post.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      Delete Post
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </CardHeader>
-              <CardContent className="p-4">
-                <p className="mb-4 text-foreground">{post.content}</p>
-                {post.image && (
-                  <img
-                    src={post.image}
-                    alt="Post"
-                    className="w-full rounded-lg"
-                  />
-                )}
-              </CardContent>
-              <CardFooter className="flex justify-between p-4">
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => toggleLike(post.id)}
-                    className={`flex items-center gap-2 ${
-                      likedPosts[post.id] ? 'text-blue-500' : 'text-muted-foreground hover:text-blue-500'
-                    }`}
-                  >
-                    <IconHeart filled={likedPosts[post.id]} />
-                    <span>{post.likes}</span>
-                  </button>
-                  <button
-                    onClick={() => openCommentDialog(post.id)}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-                  >
-                    <IconComment />
-                    <span>{post.comments}</span>
-                  </button>
-                  <button
-                    onClick={() => sharePost(post.id)}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-primary"
-                  >
-                    <IconShare />
-                  </button>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => toggleBookmark(post.id)}
-                    className={`flex items-center gap-2 ${
-                      bookmarkedPosts[post.id] ? 'text-primary' : 'text-muted-foreground hover:text-primary'
-                    }`}
-                  >
-                    <IconBookmark filled={bookmarkedPosts[post.id]} />
-                  </button>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
-        </TabsContent>
-        
-        <TabsContent value="search" className="pt-4 pb-20 p-4 mt-0">
-          <div className="mb-6">
-            <div className="relative">
-              <span className="absolute left-3 top-2.5 text-muted-foreground">
-                🔍
-              </span>
-              <Input 
-                type="text" 
-                placeholder="Search" 
-                className="pl-10" 
-                value={searchQuery}
-                onChange={handleSearch}
-              />
+      {/* Top Header - Fixed */}
+      <header className="fixed top-0 left-0 right-0 bg-background border-b z-[100]">
+        <div className="p-4 flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-2xl font-bold text-primary">SocialApp</h1>
+            <div className="pl-7">
+              <ThemeToggle />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {searchResults.map((item) => (
-              <div key={item.id} className="aspect-square bg-muted rounded-md overflow-hidden">
-                <img src={item.image} alt="Search result" className="w-full h-full object-cover" />
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="notifications" className="pt-4 pb-20 p-4 mt-0">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold">Notifications</h2>
-            {notifications.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearAllNotifications}>
-                Clear all
-              </Button>
-            )}
-          </div>
-          
-          {notifications.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="flex justify-center mb-4">
-                <Bell className="w-12 h-12 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground">No notifications yet</p>
-            </div>
-          ) : (
-            notifications.map((notification) => (
-              <div key={notification.id} className="flex items-center p-4 border-b last:border-0">
-                <Avatar className="h-10 w-10 mr-4">
-                  <AvatarImage src="/api/placeholder/40/40" alt={notification.username || 'User'} />
-                  <AvatarFallback>{(notification.username || 'U')[0].toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <p className="text-sm">
-                    <span className="font-medium">{notification.username || 'User'}</span>
-                    {' '}{notification.message}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">{notification.timestamp}</p>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-6 w-6 ml-2" 
-                  onClick={() => clearNotification(notification.id)}
+          <div className="flex items-center space-x-4 pr-12">
+            <Button variant="ghost" size="sm" onClick={() => setNewPostDialog(true)} className="flex items-center justify-center w-10 h-10">
+              <IconCamera className="w-5 h-5" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => handleTabChange('notifications')} className="flex items-center justify-center w-10 h-10 relative">
+              <IconBell className="w-5 h-5" />
+              {notifications.length > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-xs"
                 >
-                  <IconMore />
-                </Button>
-              </div>
-            ))
-          )}
-        </TabsContent>
-        
-        <TabsContent value="profile" className="pt-4 pb-20 p-4 mt-0">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold">Your Profile</h2>
-            <Button variant="ghost" size="sm" onClick={() => setProfileEditDialog(true)}>
-              <IconSettings />
+                  {notifications.length}
+                </Badge>
+              )}
             </Button>
           </div>
-          <div className="flex items-center mb-8">
-            <Avatar className="h-24 w-24 mr-6">
-              <AvatarImage src={profile.avatar} alt="Profile" />
-              <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="font-bold text-2xl mb-1">{profile.fullName}</h3>
-              <p className="text-muted-foreground mb-2">@{profile.username}</p>
-              <p className="text-sm mb-2">{profile.bio}</p>
-              <Badge variant="outline" className="mt-1">Pro Member</Badge>
-            </div>
-          </div>
-          
-          <div className="flex justify-around mb-8 text-center">
-            <div>
-              <div className="font-bold text-xl">{profile.posts}</div>
-              <div className="text-muted-foreground text-sm">Posts</div>
-            </div>
-            <Separator orientation="vertical" className="h-10" />
-            <div>
-              <div className="font-bold text-xl">{profile.followers.toLocaleString()}</div>
-              <div className="text-muted-foreground text-sm">Followers</div>
-            </div>
-            <Separator orientation="vertical" className="h-10" />
-            <div>
-              <div className="font-bold text-xl">{profile.following}</div>
-              <div className="text-muted-foreground text-sm">Following</div>
-            </div>
-          </div>
-          
-          <Tabs defaultValue="posts" className="w-full mb-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="posts">Posts</TabsTrigger>
-              <TabsTrigger value="saved">Saved</TabsTrigger>
-            </TabsList>
-            <TabsContent value="posts" className="mt-4">
-              <div className="grid grid-cols-3 gap-2">
-                {posts
-                  .filter(post => post.username === profile.username)
-                  .map(post => (
-                    <div key={post.id} className="aspect-square bg-muted rounded-md overflow-hidden">
-                      <img src={post.image} alt="Post" className="w-full h-full object-cover" />
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="pt-[72px] pb-20">
+        {activeTab === 'home' && (
+          <div className="p-6">
+            {posts.map(post => (
+              <Card key={post.id} className="mb-8 bg-card text-card-foreground">
+                <CardHeader className="flex flex-row items-center justify-between p-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={post.avatar} />
+                      <AvatarFallback>{post.username[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-foreground text-sm">{post.fullName}</p>
+                      <p className="text-xs text-muted-foreground">@{post.username}</p>
                     </div>
-                  ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="saved" className="mt-4">
-              <div className="grid grid-cols-3 gap-2">
-                {posts
-                  .filter(post => bookmarkedPosts[post.id])
-                  .map(post => (
-                    <div key={post.id} className="aspect-square bg-muted rounded-md overflow-hidden">
-                      <img src={post.image} alt="Saved post" className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                {Object.keys(bookmarkedPosts).filter(id => bookmarkedPosts[id]).length === 0 && (
-                  <div className="col-span-3 text-center py-12">
-                    <div className="flex justify-center mb-4">
-                      <Bookmark className="w-12 h-12 text-muted-foreground" />
-                    </div>
-                    <p className="text-muted-foreground">No saved posts yet</p>
                   </div>
-                )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="text-foreground hover:text-primary">
+                      <IconMore />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-popover text-popover-foreground">
+                      <DropdownMenuItem 
+                        onClick={() => toggleFollow(post.username)}
+                        className={following[post.username] ? 'text-primary' : ''}
+                      >
+                        {following[post.username] ? 'Unfollow' : 'Follow'} @{post.username}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => deletePost(post.id)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        Delete Post
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardHeader>
+                <CardContent className="p-2">
+                  <p className="mb-2 text-foreground text-sm">{post.content}</p>
+                  {post.image && (
+                    <img
+                      src={post.image}
+                      alt="Post"
+                      className="w-full rounded-lg"
+                    />
+                  )}
+                </CardContent>
+                <CardFooter className="flex justify-between p-2">
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => toggleLike(post.id)}
+                      className={`flex items-center gap-1 ${
+                        likedPosts[post.id] ? 'text-blue-500' : 'text-muted-foreground hover:text-blue-500'
+                      }`}
+                    >
+                      <IconHeart filled={likedPosts[post.id]} />
+                      <span className="text-sm">{post.likes}</span>
+                    </button>
+                    <button
+                      onClick={() => openCommentDialog(post.id)}
+                      className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                    >
+                      <IconComment />
+                      <span className="text-sm">{post.comments}</span>
+                    </button>
+                    <button
+                      onClick={() => sharePost(post.id)}
+                      className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                    >
+                      <IconShare />
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => toggleBookmark(post.id)}
+                      className={`flex items-center gap-1 ${
+                        bookmarkedPosts[post.id] ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                      }`}
+                    >
+                      <IconBookmark filled={bookmarkedPosts[post.id]} />
+                    </button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'search' && (
+          <div className="p-6">
+            <div className="mb-3">
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-muted-foreground">
+                  🔍
+                </span>
+                <Input 
+                  type="text" 
+                  placeholder="Search" 
+                  className="pl-10" 
+                  value={searchQuery}
+                  onChange={handleSearch}
+                />
               </div>
-            </TabsContent>
-          </Tabs>
-        </TabsContent>
-      </Tabs>
-      
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t">
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {searchResults.map((item) => (
+                <div key={item.id} className="aspect-square bg-muted rounded-md overflow-hidden">
+                  <img src={item.image} alt="Search result" className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'notifications' && (
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-lg font-bold">Notifications</h2>
+              {notifications.length > 0 && (
+                <Button variant="ghost" size="sm" onClick={clearAllNotifications}>
+                  Clear all
+                </Button>
+              )}
+            </div>
+            
+            {notifications.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="flex justify-center mb-4">
+                  <Bell className="w-12 h-12 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground">No notifications yet</p>
+              </div>
+            ) : (
+              notifications.map((notification) => (
+                <div key={notification.id} className="flex items-center p-4 border-b last:border-0">
+                  <Avatar className="h-10 w-10 mr-4">
+                    <AvatarImage src="/api/placeholder/40/40" alt={notification.username || 'User'} />
+                    <AvatarFallback>{(notification.username || 'U')[0].toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="text-sm">
+                      <span className="font-medium">{notification.username || 'User'}</span>
+                      {' '}{notification.message}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">{notification.timestamp}</p>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-6 ml-2" 
+                    onClick={() => clearNotification(notification.id)}
+                  >
+                    <IconMore />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
+        {activeTab === 'profile' && (
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold">Your Profile</h2>
+              <Button variant="ghost" size="sm" onClick={() => setProfileEditDialog(true)}>
+                <IconSettings />
+              </Button>
+            </div>
+            <div className="flex items-center mb-8">
+              <Avatar className="h-24 w-24 mr-6">
+                <AvatarImage src={profile.avatar} alt="Profile" />
+                <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="font-bold text-2xl mb-1">{profile.fullName}</h3>
+                <p className="text-muted-foreground mb-2">@{profile.username}</p>
+                <p className="text-sm mb-2">{profile.bio}</p>
+                <Badge variant="outline" className="mt-1">Pro Member</Badge>
+              </div>
+            </div>
+            
+            <div className="flex justify-around mb-8 text-center">
+              <div>
+                <div className="font-bold text-xl">{profile.posts}</div>
+                <div className="text-muted-foreground text-sm">Posts</div>
+              </div>
+              <Separator orientation="vertical" className="h-10" />
+              <div>
+                <div className="font-bold text-xl">{profile.followers.toLocaleString()}</div>
+                <div className="text-muted-foreground text-sm">Followers</div>
+              </div>
+              <Separator orientation="vertical" className="h-10" />
+              <div>
+                <div className="font-bold text-xl">{profile.following}</div>
+                <div className="text-muted-foreground text-sm">Following</div>
+              </div>
+            </div>
+            
+            <Tabs defaultValue="posts" className="w-full mb-6">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="posts">Posts</TabsTrigger>
+                <TabsTrigger value="saved">Saved</TabsTrigger>
+              </TabsList>
+              <TabsContent value="posts" className="mt-4">
+                <div className="grid grid-cols-3 gap-2">
+                  {posts
+                    .filter(post => post.username === profile.username)
+                    .map(post => (
+                      <div key={post.id} className="aspect-square bg-muted rounded-md overflow-hidden">
+                        <img src={post.image} alt="Post" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                </div>
+              </TabsContent>
+              <TabsContent value="saved" className="mt-4">
+                <div className="grid grid-cols-3 gap-2">
+                  {posts
+                    .filter(post => bookmarkedPosts[post.id])
+                    .map(post => (
+                      <div key={post.id} className="aspect-square bg-muted rounded-md overflow-hidden">
+                        <img src={post.image} alt="Saved post" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  {Object.keys(bookmarkedPosts).filter(id => bookmarkedPosts[id]).length === 0 && (
+                    <div className="col-span-3 text-center py-12">
+                      <div className="flex justify-center mb-4">
+                        <Bookmark className="w-12 h-12 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground">No saved posts yet</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+
+        {activeTab === 'fashion' && (
+          <div className="pt-4">
+            <FashionDashboard />
+          </div>
+        )}
+      </main>
+
+      {/* Bottom Navigation - Fixed */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-background border-t z-50">
         <div className="flex justify-around items-center h-16 px-6 max-w-screen-xl mx-auto">
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => setActiveTab('home')} 
+            onClick={() => handleTabChange('home')} 
             className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'home' ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <IconHome className="w-5 h-5" />
@@ -685,7 +718,7 @@ export default function SocialMediaApp() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => setActiveTab('search')} 
+            onClick={() => handleTabChange('search')} 
             className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'search' ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <IconSearch className="w-5 h-5" />
@@ -694,7 +727,7 @@ export default function SocialMediaApp() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => setActiveTab('fashion')} 
+            onClick={() => handleTabChange('fashion')} 
             className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'fashion' ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <IconShirt className="w-5 h-5" />
@@ -703,165 +736,14 @@ export default function SocialMediaApp() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => setActiveTab('notifications')} 
+            onClick={() => handleTabChange('notifications')} 
             className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'notifications' ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <IconBell className="w-5 h-5" />
-            <span className="text-xs">Alerts</span>
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setActiveTab('profile')} 
-            className={`flex flex-col items-center gap-1 h-auto py-2 ${activeTab === 'profile' ? 'text-primary' : 'text-muted-foreground'}`}
-          >
-            <IconUser className="w-5 h-5" />
-            <span className="text-xs">Profile</span>
+            <span className="text-xs">Notifications</span>
           </Button>
         </div>
-      </div>
-      
-      {/* Comment Dialog */}
-      <Dialog open={commentDialog} onOpenChange={setCommentDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Comments</DialogTitle>
-          </DialogHeader>
-          <div className="max-h-64 overflow-y-auto">
-            {currentPostId && comments[currentPostId]?.map(comment => (
-              <div key={comment.id} className="flex py-2 border-b last:border-0">
-                <Avatar className="h-8 w-8 mr-2">
-                  <AvatarFallback>{comment.username[0].toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <div className="flex items-center">
-                    <p className="text-sm font-medium">{comment.username}</p>
-                    <p className="text-xs text-muted-foreground ml-2">{comment.time} ago</p>
-                  </div>
-                  <p className="text-sm">{comment.content}</p>
-                </div>
-              </div>
-            ))}
-            {currentPostId && (!comments[currentPostId] || comments[currentPostId].length === 0) && (
-              <div className="text-center py-6">
-                <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>Y</AvatarFallback>
-            </Avatar>
-            <Textarea 
-              placeholder="Add a comment..." 
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="flex-1 min-h-0 h-10 py-2"
-            />
-            <Button 
-              size="sm" 
-              disabled={!newComment.trim()} 
-              onClick={addComment}
-              className="text-primary hover:text-primary/80"
-            >
-              <IconSend />
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      
-      {/* New Post Dialog */}
-      <Dialog open={newPostDialog} onOpenChange={setNewPostDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Post</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <Textarea
-              placeholder="What's on your mind?"
-              value={newPostContent}
-              onChange={(e) => setNewPostContent(e.target.value)}
-            />
-            <div className="flex items-center gap-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="hidden"
-                id="image-upload"
-              />
-              <label
-                htmlFor="image-upload"
-                className="cursor-pointer bg-primary/10 p-2 rounded-lg hover:bg-primary/20"
-              >
-                <IconCamera />
-              </label>
-              {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-20 h-20 object-cover rounded-lg"
-                />
-              )}
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={createNewPost}>Post</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Profile Edit Dialog */}
-      <Dialog open={profileEditDialog} onOpenChange={setProfileEditDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-center mb-2">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={profile.avatar} alt={profile.username} />
-                <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
-              </Avatar>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm" htmlFor="fullName">Full Name</label>
-              <Input 
-                id="fullName"
-                value={profile.fullName}
-                onChange={(e) => setProfile({...profile, fullName: e.target.value})}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm" htmlFor="username">Username</label>
-              <Input 
-                id="username"
-                value={profile.username}
-                onChange={(e) => setProfile({...profile, username: e.target.value})}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-sm" htmlFor="bio">Bio</label>
-              <Textarea 
-                id="bio"
-                value={profile.bio}
-                onChange={(e) => setProfile({...profile, bio: e.target.value})}
-                className="min-h-20"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setProfileEditDialog(false)}>Cancel</Button>
-            <Button onClick={() => updateProfile(profile)}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {activeTab === 'fashion' && (
-        <div className="pb-16">
-          <FashionDashboard />
-        </div>
-      )}
+      </nav>
     </div>
   );
 }
