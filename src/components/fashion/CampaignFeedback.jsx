@@ -121,10 +121,11 @@ export function CampaignFeedback() {
                 />
               </div>
             ) : (
-              <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center p-4">
-                <p className="text-muted-foreground text-center break-words max-w-full">
-                  No image uploaded
-                </p>
+              <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                <div className="flex flex-col items-center justify-center w-full h-full p-4">
+                  <Upload className="w-6 h-6 text-muted-foreground mb-2" />
+                  <p className="text-muted-foreground text-sm text-center max-w-[200px]">No image uploaded</p>
+                </div>
               </div>
             )}
           </div>
