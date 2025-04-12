@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 export default function SocialMediaApp() {
   const [activeTab, setActiveTab] = useState('home');
@@ -81,13 +83,7 @@ export default function SocialMediaApp() {
   })));
   
   // Notification state
-  const [notifications, setNotifications] = useState([
-    { id: 1, username: 'mike_dev', type: 'like', content: 'liked your post', time: '1h' },
-    { id: 2, username: 'design_lover', type: 'comment', content: 'commented on your photo', time: '2h' },
-    { id: 3, username: 'travel_fan', type: 'follow', content: 'started following you', time: '3h' },
-    { id: 4, username: 'photo_master', type: 'like', content: 'liked your comment', time: '4h' },
-    { id: 5, username: 'web_designer', type: 'follow', content: 'started following you', time: '5h' }
-  ]);
+  const [notifications, setNotifications] = useState([]);
   
   // Profile state
   const [profile, setProfile] = useState({
@@ -104,31 +100,73 @@ export default function SocialMediaApp() {
   // Following state (for follow/unfollow functionality)
   const [following, setFollowing] = useState({});
   
+  // New states for photo upload and alerts
+  const [alert, setAlert] = useState({ show: false, message: '', type: '' });
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  
   // Functions
-  const toggleLike = (postId) => {
-    setLikedPosts(prev => ({
-      ...prev,
-      [postId]: !prev[postId]
-    }));
+  const showNotification = (message, type = 'info') => {
+    const notification = {
+      id: Date.now(),
+      message,
+      type,
+      timestamp: new Date().toLocaleTimeString()
+    };
+    setNotifications(prev => [notification, ...prev]);
     
-    // Add a notification if it's a new like
-    if (!likedPosts[postId]) {
-      const notification = {
-        id: Date.now(),
-        username: 'your_username',
-        type: 'like',
-        content: 'liked a post',
-        time: 'Just now'
-      };
-      // In a real app, this would be sent to the post owner
+    // Show temporary alert
+    setAlert({ show: true, message, type });
+    setTimeout(() => setAlert({ show: false, message: '', type: '' }), 5000);
+  };
+  
+  const showAlert = (message, type = 'info') => {
+    setAlert({ show: true, message, type });
+    setTimeout(() => setAlert({ show: false, message: '', type: '' }), 5000);
+  };
+  
+  const toggleLike = (postId) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      const isLiked = likedPosts[postId];
+      setLikedPosts(prev => ({
+        ...prev,
+        [postId]: !isLiked
+      }));
+      
+      setPosts(prev => 
+        prev.map(p => 
+          p.id === postId 
+            ? { ...p, likes: p.likes + (isLiked ? -1 : 1) } 
+            : p
+        )
+      );
+      
+      showNotification(
+        isLiked 
+          ? `You unliked @${post.username}'s post` 
+          : `You liked @${post.username}'s post`,
+        isLiked ? 'info' : 'success'
+      );
     }
   };
   
   const toggleBookmark = (postId) => {
-    setBookmarkedPosts(prev => ({
-      ...prev,
-      [postId]: !prev[postId]
-    }));
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      const isBookmarked = bookmarkedPosts[postId];
+      setBookmarkedPosts(prev => ({
+        ...prev,
+        [postId]: !isBookmarked
+      }));
+      
+      showNotification(
+        isBookmarked 
+          ? `Removed @${post.username}'s post from bookmarks` 
+          : `Saved @${post.username}'s post to bookmarks`,
+        'success'
+      );
+    }
   };
   
   const toggleFollow = (username) => {
@@ -147,14 +185,9 @@ export default function SocialMediaApp() {
     
     // Add notification when following someone
     if (!following[username]) {
-      const notification = {
-        id: Date.now(),
-        username: 'your_username',
-        type: 'follow',
-        content: 'started following you',
-        time: 'Just now'
-      };
-      // In a real app, this would be sent to the user being followed
+      showNotification(`You started following @${username}`, 'success');
+    } else {
+      showNotification(`You unfollowed @${username}`, 'info');
     }
   };
   
@@ -166,43 +199,59 @@ export default function SocialMediaApp() {
   const addComment = () => {
     if (newComment.trim() === '') return;
     
-    const comment = {
-      id: Date.now(),
-      username: 'your_username',
-      content: newComment,
-      time: 'Just now'
-    };
-    
-    setComments(prev => ({
-      ...prev,
-      [currentPostId]: [...(prev[currentPostId] || []), comment]
-    }));
-    
-    // Update comment count in post
-    setPosts(prev => 
-      prev.map(post => 
-        post.id === currentPostId 
-          ? { ...post, comments: post.comments + 1 } 
-          : post
-      )
-    );
-    
-    setNewComment('');
-    setCommentDialog(false);
-    
-    // Add notification when commenting
-    const notification = {
-      id: Date.now(),
-      username: 'your_username',
-      type: 'comment',
-      content: 'commented on your post',
-      time: 'Just now'
-    };
-    // In a real app, this would be sent to the post owner
+    const post = posts.find(p => p.id === currentPostId);
+    if (post) {
+      const comment = {
+        id: Date.now(),
+        username: profile.username,
+        content: newComment,
+        time: 'Just now'
+      };
+      
+      setComments(prev => ({
+        ...prev,
+        [currentPostId]: [...(prev[currentPostId] || []), comment]
+      }));
+      
+      setPosts(prev => 
+        prev.map(p => 
+          p.id === currentPostId 
+            ? { ...p, comments: p.comments + 1 } 
+            : p
+        )
+      );
+      
+      showNotification(
+        `You commented on @${post.username}'s post`,
+        'success'
+      );
+      
+      setNewComment('');
+      setCommentDialog(false);
+    }
+  };
+  
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        showAlert('Image size should be less than 5MB', 'error');
+        return;
+      }
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
   
   const createNewPost = () => {
-    if (newPostContent.trim() === '') return;
+    if (newPostContent.trim() === '' && !selectedImage) {
+      showNotification('Please add some content or an image', 'error');
+      return;
+    }
     
     const newPost = {
       id: Date.now(),
@@ -210,7 +259,7 @@ export default function SocialMediaApp() {
       fullName: profile.fullName,
       avatar: profile.avatar,
       content: newPostContent,
-      image: '/api/placeholder/400/250',
+      image: selectedImage ? imagePreview : '/api/placeholder/400/250',
       likes: 0,
       comments: 0,
       time: 'Just now'
@@ -218,13 +267,24 @@ export default function SocialMediaApp() {
     
     setPosts(prev => [newPost, ...prev]);
     setNewPostContent('');
+    setSelectedImage(null);
+    setImagePreview(null);
     setNewPostDialog(false);
     
-    // Update post count in profile
     setProfile(prev => ({
       ...prev,
       posts: prev.posts + 1
     }));
+
+    showNotification('Post created successfully!', 'success');
+  };
+  
+  const deletePost = (postId) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      setPosts(prev => prev.filter(p => p.id !== postId));
+      showNotification(`Post by @${post.username} deleted successfully`, 'success');
+    }
   };
   
   const handleSearch = (e) => {
@@ -254,11 +314,28 @@ export default function SocialMediaApp() {
       ...newProfileData
     }));
     setProfileEditDialog(false);
+    showNotification('Profile updated successfully!', 'success');
   };
   
   const sharePost = (postId) => {
-    // Simulate share functionality
-    alert(`Post ${postId} shared!`);
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      const shareData = {
+        title: `Post by @${post.username}`,
+        text: post.content,
+        url: window.location.href
+      };
+      
+      if (navigator.share) {
+        navigator.share(shareData)
+          .then(() => showNotification('Post shared successfully!', 'success'))
+          .catch(() => showNotification('Sharing failed', 'error'));
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        navigator.clipboard.writeText(`${post.content}\n\nShared from SocialApp`);
+        showNotification('Post link copied to clipboard!', 'success');
+      }
+    }
   };
   
   const clearNotification = (notificationId) => {
@@ -288,7 +365,26 @@ export default function SocialMediaApp() {
   const IconGallery = () => <span className="text-base">🖼️</span>;
 
   return (
-    <div className="max-w-md mx-auto bg-gray-50 h-screen overflow-y-auto">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Notifications/Alerts Section */}
+      <div className="fixed top-4 right-4 z-50 space-y-2 w-80">
+        {alert.show && (
+          <Alert
+            variant={alert.type === 'error' ? 'destructive' : 'default'}
+            className="animate-in slide-in-from-right duration-300"
+          >
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 mt-0.5" />
+              <div className="flex-1">
+                <AlertDescription>
+                  {alert.message}
+                </AlertDescription>
+              </div>
+            </div>
+          </Alert>
+        )}
+      </div>
+
       {/* Top Header */}
       <div className="bg-background p-4 flex justify-between items-center sticky top-0 z-10 border-b">
         <h1 className="text-2xl font-bold text-primary">SocialApp</h1>
@@ -296,8 +392,18 @@ export default function SocialMediaApp() {
           <Button variant="ghost" size="sm" onClick={() => setNewPostDialog(true)}>
             <IconCamera />
           </Button>
-          <Button variant="ghost" size="sm">
-            <IconMessage />
+          <Button variant="ghost" size="sm" onClick={() => setActiveTab('notifications')}>
+            <div className="relative">
+              <IconBell />
+              {notifications.length > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center"
+                >
+                  {notifications.length}
+                </Badge>
+              )}
+            </div>
           </Button>
         </div>
       </div>
@@ -306,88 +412,82 @@ export default function SocialMediaApp() {
       <Tabs defaultValue="home" className="w-full" value={activeTab} onValueChange={setActiveTab}>
         <TabsContent value="home" className="pb-20 p-3 mt-0">
           {posts.map(post => (
-            <Card key={post.id} className="mb-4">
-              <CardHeader className="p-4 pb-2 pt-3">
-                <div className="flex items-center">
-                  <Avatar className="h-10 w-10 mr-3">
-                    <AvatarImage src={post.avatar} alt={post.username} />
-                    <AvatarFallback>{post.username[0].toUpperCase()}</AvatarFallback>
+            <Card key={post.id} className="mb-4 bg-card text-card-foreground">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Avatar>
+                    <AvatarImage src={post.avatar} />
+                    <AvatarFallback>{post.username[0]}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1">
-                    <div className="font-medium">{post.fullName}</div>
-                    <div className="text-xs text-muted-foreground">@{post.username} • {post.time} ago</div>
+                  <div>
+                    <p className="font-semibold text-foreground">{post.fullName}</p>
+                    <p className="text-sm text-muted-foreground">@{post.username}</p>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8">
-                        <IconMore />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => toggleFollow(post.username)}>
-                        {following[post.username] ? 'Unfollow' : 'Follow'} @{post.username}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => toggleBookmark(post.id)}>
-                        {bookmarkedPosts[post.id] ? 'Remove from' : 'Save to'} bookmarks
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        Copy link
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-500">
-                        Report post
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="text-foreground hover:text-primary">
+                    <IconMore />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-popover text-popover-foreground">
+                    <DropdownMenuItem 
+                      onClick={() => toggleFollow(post.username)}
+                      className={following[post.username] ? 'text-primary' : ''}
+                    >
+                      {following[post.username] ? 'Unfollow' : 'Follow'} @{post.username}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => deletePost(post.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      Delete Post
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </CardHeader>
-              <CardContent className="p-4 pt-1 pb-2">
-                <p className="mb-3">{post.content}</p>
-                <img 
-                  src={post.image} 
-                  alt="Post content" 
-                  className="rounded-md w-full mb-2" 
-                />
+              <CardContent>
+                <p className="mb-4 text-foreground">{post.content}</p>
+                {post.image && (
+                  <img
+                    src={post.image}
+                    alt="Post"
+                    className="w-full rounded-lg"
+                  />
+                )}
               </CardContent>
-              <CardFooter className="p-0">
-                <div className="flex justify-between items-center w-full px-4 py-2">
-                  <div className="flex gap-4">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="flex items-center gap-1 px-2" 
-                      onClick={() => toggleLike(post.id)}
-                    >
-                      <IconHeart filled={likedPosts[post.id]} />
-                      <span>{likedPosts[post.id] ? post.likes + 1 : post.likes}</span>
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="flex items-center gap-1 px-2"
-                      onClick={() => openCommentDialog(post.id)}
-                    >
-                      <IconComment />
-                      <span>{comments[post.id]?.length || post.comments}</span>
-                    </Button>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="px-2"
-                      onClick={() => sharePost(post.id)}
-                    >
-                      <IconShare />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="px-2"
-                      onClick={() => toggleBookmark(post.id)}
-                    >
-                      <IconBookmark filled={bookmarkedPosts[post.id]} />
-                    </Button>
-                  </div>
+              <CardFooter className="flex justify-between">
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => toggleLike(post.id)}
+                    className={`flex items-center gap-1 ${
+                      likedPosts[post.id] ? 'text-blue-500' : 'text-muted-foreground hover:text-blue-500'
+                    }`}
+                  >
+                    <IconHeart filled={likedPosts[post.id]} />
+                    <span>{post.likes}</span>
+                  </button>
+                  <button
+                    onClick={() => openCommentDialog(post.id)}
+                    className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                  >
+                    <IconComment />
+                    <span>{post.comments}</span>
+                  </button>
+                  <button
+                    onClick={() => sharePost(post.id)}
+                    className="flex items-center gap-1 text-muted-foreground hover:text-primary"
+                  >
+                    <IconShare />
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => toggleBookmark(post.id)}
+                    className={`flex items-center gap-1 ${
+                      bookmarkedPosts[post.id] ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                    }`}
+                  >
+                    <IconBookmark filled={bookmarkedPosts[post.id]} />
+                  </button>
                 </div>
               </CardFooter>
             </Card>
@@ -437,25 +537,16 @@ export default function SocialMediaApp() {
             notifications.map((notification) => (
               <div key={notification.id} className="flex items-center p-3 border-b last:border-0">
                 <Avatar className="h-10 w-10 mr-3">
-                  <AvatarImage src="/api/placeholder/40/40" alt={notification.username} />
-                  <AvatarFallback>{notification.username[0].toUpperCase()}</AvatarFallback>
+                  <AvatarImage src="/api/placeholder/40/40" alt={notification.username || 'User'} />
+                  <AvatarFallback>{(notification.username || 'U')[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <p className="text-sm">
-                    <span className="font-medium">{notification.username}</span>
-                    {' '}{notification.content}
+                    <span className="font-medium">{notification.username || 'User'}</span>
+                    {' '}{notification.message}
                   </p>
-                  <p className="text-xs text-muted-foreground">{notification.time} ago</p>
+                  <p className="text-xs text-muted-foreground">{notification.timestamp}</p>
                 </div>
-                {notification.type === 'follow' && (
-                  <Button 
-                    size="sm" 
-                    variant={following[notification.username] ? "outline" : "secondary"}
-                    onClick={() => toggleFollow(notification.username)}
-                  >
-                    {following[notification.username] ? 'Following' : 'Follow'}
-                  </Button>
-                )}
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -513,25 +604,24 @@ export default function SocialMediaApp() {
             </TabsList>
             <TabsContent value="posts" className="mt-2">
               <div className="grid grid-cols-3 gap-1">
-                {profile.images.map((image) => (
-                  <div key={image.id} className="aspect-square bg-muted rounded-md overflow-hidden">
-                    <img src={image.src} alt="Post" className="w-full h-full object-cover" />
-                  </div>
-                ))}
+                {posts
+                  .filter(post => post.username === profile.username)
+                  .map(post => (
+                    <div key={post.id} className="aspect-square bg-muted rounded-md overflow-hidden">
+                      <img src={post.image} alt="Post" className="w-full h-full object-cover" />
+                    </div>
+                  ))}
               </div>
             </TabsContent>
             <TabsContent value="saved" className="mt-2">
               <div className="grid grid-cols-3 gap-1">
-                {Object.keys(bookmarkedPosts)
-                  .filter(id => bookmarkedPosts[id])
-                  .map((id) => {
-                    const post = posts.find(p => p.id === parseInt(id));
-                    return post ? (
-                      <div key={id} className="aspect-square bg-muted rounded-md overflow-hidden">
-                        <img src={post.image} alt="Saved post" className="w-full h-full object-cover" />
-                      </div>
-                    ) : null;
-                  })}
+                {posts
+                  .filter(post => bookmarkedPosts[post.id])
+                  .map(post => (
+                    <div key={post.id} className="aspect-square bg-muted rounded-md overflow-hidden">
+                      <img src={post.image} alt="Saved post" className="w-full h-full object-cover" />
+                    </div>
+                  ))}
                 {Object.keys(bookmarkedPosts).filter(id => bookmarkedPosts[id]).length === 0 && (
                   <div className="col-span-3 text-center py-8">
                     <div className="text-4xl mx-auto mb-2 text-muted-foreground">🔖</div>
@@ -548,28 +638,28 @@ export default function SocialMediaApp() {
           <TabsList className="grid w-full grid-cols-4 bg-transparent h-auto gap-1">
             <TabsTrigger 
               value="home" 
-              className="flex flex-col items-center data-[state=active]:bg-transparent py-1 px-0"
+              className="flex flex-col items-center data-[state=active]:text-primary py-1 px-0"
             >
               <IconHome />
               <span className="text-xs mt-1">Home</span>
             </TabsTrigger>
             <TabsTrigger 
               value="search" 
-              className="flex flex-col items-center data-[state=active]:bg-transparent py-1 px-0"
+              className="flex flex-col items-center data-[state=active]:text-primary py-1 px-0"
             >
               <IconSearch />
               <span className="text-xs mt-1">Search</span>
             </TabsTrigger>
             <TabsTrigger 
               value="notifications" 
-              className="flex flex-col items-center data-[state=active]:bg-transparent py-1 px-0"
+              className="flex flex-col items-center data-[state=active]:text-primary py-1 px-0"
             >
               <IconBell />
               <span className="text-xs mt-1">Alerts</span>
             </TabsTrigger>
             <TabsTrigger 
               value="profile" 
-              className="flex flex-col items-center data-[state=active]:bg-transparent py-1 px-0"
+              className="flex flex-col items-center data-[state=active]:text-primary py-1 px-0"
             >
               <IconUser />
               <span className="text-xs mt-1">Profile</span>
@@ -615,7 +705,12 @@ export default function SocialMediaApp() {
               onChange={(e) => setNewComment(e.target.value)}
               className="flex-1 min-h-0 h-10 py-2"
             />
-            <Button size="sm" disabled={!newComment.trim()} onClick={addComment}>
+            <Button 
+              size="sm" 
+              disabled={!newComment.trim()} 
+              onClick={addComment}
+              className="text-primary hover:text-primary/80"
+            >
               <IconSend />
             </Button>
           </div>
@@ -624,36 +719,42 @@ export default function SocialMediaApp() {
       
       {/* New Post Dialog */}
       <Dialog open={newPostDialog} onOpenChange={setNewPostDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Create new post</DialogTitle>
+            <DialogTitle>Create New Post</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4">
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2 items-center">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={profile.avatar} alt={profile.username} />
-                  <AvatarFallback>{profile.username[0].toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="text-sm font-medium">{profile.username}</div>
-              </div>
-              <Textarea 
-                placeholder="What's on your mind?" 
-                value={newPostContent}
-                onChange={(e) => setNewPostContent(e.target.value)}
-                className="min-h-20"
+          <div className="grid gap-4 py-4">
+            <Textarea
+              placeholder="What's on your mind?"
+              value={newPostContent}
+              onChange={(e) => setNewPostContent(e.target.value)}
+            />
+            <div className="flex items-center gap-4">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+                id="image-upload"
               />
-            </div>
-            <div className="flex justify-between">
-              <Button variant="outline" className="flex gap-2 items-center">
-                <IconGallery />
-                <span>Add Photo</span>
-              </Button>
-              <Button onClick={createNewPost} disabled={!newPostContent.trim()}>
-                Post
-              </Button>
+              <label
+                htmlFor="image-upload"
+                className="cursor-pointer bg-primary/10 p-2 rounded-lg hover:bg-primary/20"
+              >
+                <IconCamera />
+              </label>
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-20 h-20 object-cover rounded-lg"
+                />
+              )}
             </div>
           </div>
+          <DialogFooter>
+            <Button onClick={createNewPost}>Post</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       
