@@ -50,210 +50,181 @@ const SENTIMENTS = [
 ];
 
 export function CampaignFeedback() {
-  const [selectedCampaign, setSelectedCampaign] = useState(mockCampaigns[0]);
+  const [selectedSentiment, setSelectedSentiment] = useState('empowering');
+  const [imagePreview, setImagePreview] = useState(null);
   const [newComment, setNewComment] = useState('');
-  const [selectedSentiment, setSelectedSentiment] = useState('');
-  const [userReaction, setUserReaction] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [emotions, setEmotions] = useState({
+    empowering: 0,
+    casual: 0,
+    bold: 0,
+    romantic: 0,
+  });
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDeleteImage = () => {
+    setImagePreview(null);
+  };
 
   const handleCommentSubmit = () => {
-    if (newComment.trim() && selectedSentiment) {
-      const newCommentObj = {
-        id: Date.now(),
-        user: 'current_user',
-        text: newComment.trim(),
-        emotion: selectedSentiment
-      };
-      
-      setSelectedCampaign(prev => {
-        const updatedEmotions = { ...prev.emotions };
-        
-        // Update emotion values
-        if (selectedSentiment && updatedEmotions.hasOwnProperty(selectedSentiment)) {
-          updatedEmotions[selectedSentiment] = Math.min(100, updatedEmotions[selectedSentiment] + 25);
-        }
-        
-        return {
-          ...prev,
-          emotions: updatedEmotions,
-          comments: [...prev.comments, newCommentObj]
-        };
+    if (!newComment.trim() || !selectedSentiment) {
+      toast({
+        title: "Error",
+        description: "Please enter a comment and select a sentiment",
+        variant: "destructive",
       });
-      
-      setNewComment('');
-      setSelectedSentiment('');
-      toast.success('Comment added successfully');
-    } else {
-      toast.error('Please add both comment and sentiment');
+      return;
     }
-  };
 
-  const handleUpload = (e) => {
-    // Handle file upload logic here
-    console.log('File uploaded:', e.target.files[0]);
-  };
+    const newCommentObj = {
+      id: Date.now(),
+      text: newComment,
+      timestamp: new Date().toISOString(),
+      sentiment: selectedSentiment,
+    };
 
-  const handleReaction = (reaction) => {
-    if (userReaction === reaction) {
-      // Remove reaction
-      setUserReaction(null);
-      setSelectedCampaign(prev => ({
-        ...prev,
-        reactions: {
-          ...prev.reactions,
-          [reaction]: prev.reactions[reaction] - 1
-        }
-      }));
-      toast.info('Reaction removed');
-    } else {
-      // Add new reaction
-      if (userReaction) {
-        // Remove previous reaction
-        setSelectedCampaign(prev => ({
-          ...prev,
-          reactions: {
-            ...prev.reactions,
-            [userReaction]: prev.reactions[userReaction] - 1
-          }
-        }));
-      }
-      setUserReaction(reaction);
-      setSelectedCampaign(prev => ({
-        ...prev,
-        reactions: {
-          ...prev.reactions,
-          [reaction]: prev.reactions[reaction] + 1
-        }
-      }));
-      toast.success(`Added ${reaction} reaction`);
-    }
+    setComments([...comments, newCommentObj]);
+    setNewComment('');
+
+    // Update emotions based on the selected sentiment
+    setEmotions(prev => ({
+      ...prev,
+      [selectedSentiment]: Math.min(prev[selectedSentiment] + 25, 100)
+    }));
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <Card className="w-full max-w-3xl mx-auto p-6">
+      <CardHeader className="px-0">
         <CardTitle>Campaign Feedback Analysis</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="mb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleUpload}
-              className="hidden"
-              id="campaign-upload"
-            />
-            <Button asChild>
-              <label htmlFor="campaign-upload" className="cursor-pointer">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Campaign Content
-              </label>
-            </Button>
-          </div>
-
-          {selectedCampaign && (
-            <div className="space-y-4">
-              <div className="relative">
+      <CardContent className="space-y-8 px-0">
+        {/* Image Upload Section */}
+        <div className="flex items-center gap-6">
+          <div className="flex-1 min-w-0">
+            {imagePreview ? (
+              <div className="relative w-full h-48">
                 <img
-                  src={selectedCampaign.image}
-                  alt={selectedCampaign.title}
-                  className="w-full h-48 object-cover rounded-lg"
+                  src={imagePreview}
+                  alt="Campaign preview"
+                  className="object-cover rounded-lg w-full h-full"
                 />
-                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={`flex items-center gap-1 ${
-                        userReaction === 'positive' ? 'text-green-500' : 'text-muted-foreground'
-                      }`}
-                      onClick={() => handleReaction('positive')}
-                    >
-                      <ThumbsUp className="w-4 h-4" />
-                      <span>{selectedCampaign.reactions.positive}</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={`flex items-center gap-1 ${
-                        userReaction === 'negative' ? 'text-red-500' : 'text-muted-foreground'
-                      }`}
-                      onClick={() => handleReaction('negative')}
-                    >
-                      <ThumbsDown className="w-4 h-4" />
-                      <span>{selectedCampaign.reactions.negative}</span>
-                    </Button>
-                  </div>
-                  <Badge variant="secondary">
-                    <MessageSquare className="w-3 h-3 mr-1" />
-                    {selectedCampaign.comments.length}
-                  </Badge>
-                </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(selectedCampaign.emotions).map(([emotion, value]) => (
-                  <div key={emotion} className="bg-card border rounded-lg p-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium capitalize text-foreground">{emotion}</span>
-                      <Badge variant="outline">{value}%</Badge>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full"
-                        style={{ width: `${value}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+            ) : (
+              <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center p-4">
+                <p className="text-muted-foreground text-center break-words max-w-full">
+                  No image uploaded
+                </p>
               </div>
+            )}
+          </div>
+          <div className="flex flex-col gap-3 shrink-0">
+            <Button
+              onClick={() => document.getElementById('campaign-upload').click()}
+              className="w-[140px]"
+              variant="outline"
+            >
+              Upload Image
+            </Button>
+            <input
+              type="file"
+              id="campaign-upload"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            {imagePreview && (
+              <Button
+                onClick={handleDeleteImage}
+                className="w-[140px]"
+                variant="destructive"
+              >
+                Delete Image
+              </Button>
+            )}
+          </div>
+        </div>
 
-              <div className="space-y-4">
-                <h3 className="font-semibold text-foreground">Comments</h3>
-                {selectedCampaign.comments.map((comment) => (
-                  <div key={comment.id} className="bg-card border p-3 rounded-lg">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-medium text-foreground">@{comment.user}</span>
-                      <Badge variant="outline" className="capitalize">
-                        {comment.emotion}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{comment.text}</p>
-                  </div>
-                ))}
+        {/* Comment Input Section */}
+        <div className="space-y-4">
+          <div className="flex items-end gap-4">
+            <div className="flex-1 min-w-0">
+              <Textarea
+                placeholder="Add your comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                className="min-h-[100px] w-full"
+              />
+            </div>
+            <div className="flex flex-col gap-2 shrink-0">
+              <Select
+                value={selectedSentiment}
+                onValueChange={setSelectedSentiment}
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Select sentiment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="empowering">Empowering</SelectItem>
+                  <SelectItem value="casual">Casual</SelectItem>
+                  <SelectItem value="bold">Bold</SelectItem>
+                  <SelectItem value="romantic">Romantic</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={handleCommentSubmit} 
+                className="w-[140px]"
+                disabled={!newComment.trim() || !selectedSentiment}
+              >
+                Send
+              </Button>
+            </div>
+          </div>
+        </div>
 
-                <div className="flex flex-col gap-4">
-                  <div className="flex gap-4">
-                    <Textarea
-                      placeholder="Add your comment..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      className="text-foreground flex-1"
-                    />
-                    <Select value={selectedSentiment} onValueChange={setSelectedSentiment}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select sentiment" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SENTIMENTS.map((sentiment) => (
-                          <SelectItem key={sentiment.value} value={sentiment.value}>
-                            {sentiment.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button 
-                    onClick={handleCommentSubmit}
-                    disabled={!newComment.trim() || !selectedSentiment}
-                    className="self-end"
-                  >
-                    Send
-                  </Button>
-                </div>
+        {/* Emotion Sliders Section */}
+        <div className="grid grid-cols-2 gap-4">
+          {Object.entries(emotions).map(([emotion, value]) => (
+            <div key={emotion} className="bg-card border rounded-lg p-4">
+              <div className="flex justify-between items-center mb-3">
+                <span className="font-medium capitalize text-foreground truncate">{emotion}</span>
+                <Badge variant="outline">{value}%</Badge>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div
+                  className="bg-primary rounded-full h-2 transition-all duration-300"
+                  style={{ width: `${value}%` }}
+                />
               </div>
             </div>
-          )}
+          ))}
+        </div>
+        
+        {/* Comments Section */}
+        <div className="space-y-4">
+          {comments.map((comment) => (
+            <Card key={comment.id} className="p-4">
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-foreground break-words">{comment.text}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {new Date(comment.timestamp).toLocaleString()}
+                  </p>
+                </div>
+                <Badge variant="secondary" className="shrink-0">{comment.sentiment}</Badge>
+              </div>
+            </Card>
+          ))}
         </div>
       </CardContent>
     </Card>
