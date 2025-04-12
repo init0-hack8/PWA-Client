@@ -8,8 +8,12 @@ import {
   ShoppingBag, 
   Share2, 
   Plus, 
-  Search 
+  Search,
+  X,
+  Star,
+  Trash2
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const mockItems = [
   {
@@ -20,6 +24,8 @@ const mockItems = [
     price: '$89.99',
     tags: ['formal', 'workwear', 'trendy'],
     emotions: ['confident', 'professional'],
+    rating: 4.5,
+    ratingCount: 12
   },
   {
     id: 2,
@@ -29,19 +35,143 @@ const mockItems = [
     price: '$49.99',
     tags: ['casual', 'streetwear', 'versatile'],
     emotions: ['chill', 'cool'],
+    rating: 4.2,
+    ratingCount: 8
   },
+  {
+    id: 3,
+    image: 'https://source.unsplash.com/random/300x400/?fashion,outfit',
+    brand: 'Nike',
+    name: 'Sporty Outfit',
+    price: '$129.99',
+    tags: ['sporty', 'casual', 'active'],
+    emotions: ['energetic', 'active'],
+    rating: 4.8,
+    ratingCount: 15
+  },
+  {
+    id: 4,
+    image: 'https://source.unsplash.com/random/300x400/?fashion,formal',
+    brand: 'Gucci',
+    name: 'Formal Suit',
+    price: '$899.99',
+    tags: ['formal', 'luxury', 'elegant'],
+    emotions: ['sophisticated', 'elegant'],
+    rating: 4.9,
+    ratingCount: 20
+  }
 ];
 
 export function CollaborativeCloset() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const [newTag, setNewTag] = useState('');
+  const [closetItems, setClosetItems] = useState(mockItems);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [tryOnItems, setTryOnItems] = useState([]);
 
   const handleAddTag = () => {
     if (newTag.trim() && selectedItem) {
       // Add tag logic here
       setNewTag('');
     }
+  };
+
+  const handleRating = (rating) => {
+    if (!selectedItem) return;
+    
+    const updatedItems = closetItems.map(item => {
+      if (item.id === selectedItem.id) {
+        const newRating = ((item.rating * item.ratingCount) + rating) / (item.ratingCount + 1);
+        return {
+          ...item,
+          rating: newRating,
+          ratingCount: item.ratingCount + 1
+        };
+      }
+      return item;
+    });
+    
+    setClosetItems(updatedItems);
+    setSelectedItem(updatedItems.find(item => item.id === selectedItem.id));
+    setUserRating(rating);
+    toast.success('Rating submitted successfully');
+  };
+
+  const handleShare = async () => {
+    if (!selectedItem) return;
+
+    try {
+      const shareData = {
+        title: selectedItem.name,
+        text: `Check out this ${selectedItem.category} from ${selectedItem.brand}!`,
+        url: selectedItem.image
+      };
+
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        await navigator.clipboard.writeText(shareData.text);
+        toast.success('Item details copied to clipboard');
+      }
+    } catch (error) {
+      toast.error('Failed to share item');
+    }
+  };
+
+  const handleAddItem = (item) => {
+    if (closetItems.some(existingItem => existingItem.id === item.id)) {
+      toast.error('This item is already in your closet');
+      return;
+    }
+    setClosetItems([...closetItems, item]);
+    setSelectedItem(item);
+    setShowAddDialog(false);
+    toast.success('Item added to your closet');
+  };
+
+  const handleRemoveItem = (itemId) => {
+    setClosetItems(closetItems.filter(item => item.id !== itemId));
+    setSelectedItem(null);
+    toast.success('Item removed from your closet');
+  };
+
+  const importFromTryOn = (items) => {
+    const newItems = items.map(item => ({
+      ...item,
+      id: Date.now() + Math.random(), // Generate unique ID
+      rating: 0,
+      ratingCount: 0
+    }));
+    
+    setClosetItems([...closetItems, ...newItems]);
+    toast.success(`${newItems.length} items imported from TryOn`);
+  };
+
+  const handleAddFromTryOn = () => {
+    // This would typically be called from the TryOn page
+    // For now, we'll simulate adding some items
+    const tryOnItems = [
+      {
+        image: 'https://source.unsplash.com/random/300x400/?fashion,summer',
+        brand: 'H&M',
+        name: 'Summer Dress',
+        price: '$39.99',
+        tags: ['summer', 'casual', 'dress'],
+        emotions: ['happy', 'relaxed']
+      },
+      {
+        image: 'https://source.unsplash.com/random/300x400/?fashion,accessories',
+        brand: 'Zara',
+        name: 'Statement Necklace',
+        price: '$29.99',
+        tags: ['accessories', 'statement', 'trendy'],
+        emotions: ['bold', 'confident']
+      }
+    ];
+    importFromTryOn(tryOnItems);
   };
 
   const filteredItems = mockItems.filter(item =>
@@ -52,98 +182,222 @@ export function CollaborativeCloset() {
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Collaborative Closet</CardTitle>
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl">Collaborative Closet</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Share and discover fashion items with your community
+        </p>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowAddDialog(true)}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Add Items
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleAddFromTryOn}
+          >
+            <ShoppingBag className="w-4 h-4 mr-1" />
+            Import from TryOn
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-6">
-          <div className="flex gap-4 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search items..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Item
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className={`relative group cursor-pointer ${
-                  selectedItem?.id === item.id ? 'ring-2 ring-blue-500' : ''
-                }`}
+        <div className="flex flex-col gap-6">
+          {/* Closet Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {closetItems.map((item) => (
+              <div 
+                key={item.id} 
+                className="relative group aspect-square rounded-lg overflow-hidden cursor-pointer"
                 onClick={() => setSelectedItem(item)}
               >
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-64 object-cover rounded-lg"
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,clothing';
+                  }}
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col justify-end p-4">
-                  <div className="text-white">
-                    <p className="font-semibold">{item.brand}</p>
-                    <p>{item.name}</p>
-                    <p className="text-sm">{item.price}</p>
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    {item.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary">
-                        {tag}
-                      </Badge>
-                    ))}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 className="text-white font-medium">{item.name}</h3>
+                    <p className="text-white/80 text-sm">{item.category}</p>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        {selectedItem && (
-          <div className="space-y-4">
-            <h3 className="font-semibold">Item Details</h3>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Add a tag..."
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-              />
-              <Button onClick={handleAddTag}>
-                <Tag className="w-4 h-4 mr-2" />
-                Add Tag
-              </Button>
+            <div 
+              className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer flex flex-col items-center justify-center"
+              onClick={() => setShowAddDialog(true)}
+            >
+              <Plus className="w-8 h-8 text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">Add Item</p>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <h4 className="font-medium">Emotions</h4>
-              <div className="flex gap-2">
-                {selectedItem.emotions.map((emotion) => (
-                  <Badge key={emotion} variant="outline">
-                    {emotion}
-                  </Badge>
-                ))}
+          {/* Add Item Dialog */}
+          {showAddDialog && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-background p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Select an Item to Add</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowAddDialog(false)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {mockItems.map((item) => (
+                    <div 
+                      key={item.id}
+                      className="relative group aspect-square rounded-lg overflow-hidden cursor-pointer border"
+                      onClick={() => handleAddItem(item)}
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        onError={(e) => {
+                          e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,clothing';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <h3 className="text-white font-medium">{item.name}</h3>
+                          <p className="text-white/80 text-sm">{item.brand}</p>
+                          <p className="text-white/80 text-sm">{item.price}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
+          )}
 
-            <div className="flex gap-2">
-              <Button variant="outline">
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                View Similar Products
-              </Button>
-              <Button variant="outline">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
-              </Button>
+          {/* Item Details */}
+          {selectedItem && (
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">{selectedItem.name}</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleShare}
+                    className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                  >
+                    <Share2 className="w-4 h-4 mr-1" />
+                    Share
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleRemoveItem(selectedItem.id)}
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Remove
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setSelectedItem(null)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="relative aspect-square rounded-lg overflow-hidden">
+                  <img
+                    src={selectedItem.image}
+                    alt={selectedItem.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,clothing';
+                    }}
+                  />
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium">Brand</h4>
+                    <p className="text-muted-foreground">{selectedItem.brand}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium">Category</h4>
+                    <p className="text-muted-foreground">{selectedItem.category}</p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium">Price</h4>
+                    <p className="text-muted-foreground">{selectedItem.price}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium">Rating</h4>
+                    <div className="flex items-center gap-2">
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            onClick={() => handleRating(star)}
+                            className="focus:outline-none"
+                          >
+                            <Star
+                              className={`w-5 h-5 ${
+                                star <= (userRating || selectedItem.rating)
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        ({selectedItem.ratingCount} ratings)
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium">Emotions</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedItem.emotions.map((emotion) => (
+                        <Badge key={emotion} variant="secondary">
+                          {emotion}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium">Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedItem.tags?.map((tag) => (
+                        <Badge key={tag} variant="outline">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
   );

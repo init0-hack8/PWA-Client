@@ -6,22 +6,114 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ImageIcon, Plus, Sparkles, X, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
+const GEMINI_API_KEY = 'AIzaSyCXCFLv0J3y4oKbOnxH6e3OZoDCkxVfC8I';
+
 export function BrandMoodboard() {
   const [moodboard, setMoodboard] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDragging, setIsDragging] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleSearch = async (query) => {
+  const listAvailableModels = async () => {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models?key=${GEMINI_API_KEY}`);
+      const data = await response.json();
+      console.log('Available models:', data);
+      return data;
+    } catch (error) {
+      console.error('Error listing models:', error);
+      return null;
+    }
+  };
+
+  const generateSuggestions = async () => {
+    try {
+      setIsGenerating(true);
+      
+      // First, list available models to ensure we're using the correct one
+      const models = await listAvailableModels();
+      if (!models) {
+        throw new Error('Could not fetch available models');
+      }
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `Generate fashion moodboard suggestions based on the following query: ${searchQuery || 'general fashion trends'}. 
+              Provide 3 suggestions with emotions and styles. Format each suggestion as: "Emotion: Style description"
+              Example format:
+              Elegant: Classic black dress with pearl accessories
+              Edgy: Leather jacket with ripped jeans
+              Bohemian: Flowy maxi dress with layered jewelry"`
+            }]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`API request failed with status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        throw new Error('Invalid response format from API');
+      }
+
+      const generatedText = data.candidates[0].content.parts[0].text;
+      const suggestions = generatedText.split('\n')
+        .filter(line => line.trim() && line.includes(':'))
+        .map((line, index) => {
+          const [emotion, ...styleParts] = line.split(':').map(part => part.trim());
+          const style = styleParts.join(':').trim();
+          return {
+            id: index + 1,
+            image: `https://source.unsplash.com/random/300x400/?${style.toLowerCase().replace(/\s+/g, ',')},fashion`,
+            emotion: emotion || 'trendy',
+            style: style || 'fashion trend',
+            likes: Math.floor(Math.random() * 100) + 50
+          };
+        });
+
+      if (suggestions.length === 0) {
+        throw new Error('No valid suggestions generated');
+      }
+
+      setSuggestions(suggestions);
+      toast.success('Generated new suggestions!');
+    } catch (error) {
+      console.error('Error generating suggestions:', error);
+      toast.error(`Failed to generate suggestions: ${error.message}`);
+      // Fallback to mock data if API fails
+      const mockSuggestions = [
+        { id: 1, image: 'https://source.unsplash.com/random/300x400/?fashion,trendy', emotion: 'Trendy', style: 'Modern street style', likes: 85 },
+        { id: 2, image: 'https://source.unsplash.com/random/300x400/?fashion,classic', style: 'Timeless elegance', likes: 92 },
+        { id: 3, image: 'https://source.unsplash.com/random/300x400/?fashion,bohemian', emotion: 'Bohemian', style: 'Free-spirited chic', likes: 78 }
+      ];
+      setSuggestions(mockSuggestions);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSearch = (query) => {
     setSearchQuery(query);
-    // Mock API call to get suggestions
-    const mockSuggestions = [
-      { id: 1, image: '/api/placeholder/200/200', emotion: 'empowering', likes: 120 },
-      { id: 2, image: '/api/placeholder/200/200', emotion: 'bold', likes: 95 },
-      { id: 3, image: '/api/placeholder/200/200', emotion: 'romantic', likes: 78 },
-    ];
-    setSuggestions(mockSuggestions);
+  };
+
+  const handleGenerateClick = async () => {
+    if (searchQuery.trim()) {
+      await generateSuggestions();
+    } else {
+      toast.error('Please enter a search query first');
+    }
   };
 
   const addToMoodboard = (item) => {
@@ -107,9 +199,14 @@ export function BrandMoodboard() {
                   className="pl-9 bg-background"
                 />
               </div>
-              <Button variant="secondary" className="flex items-center gap-2">
+              <Button 
+                variant="secondary" 
+                className="flex items-center gap-2"
+                onClick={handleGenerateClick}
+                disabled={isGenerating}
+              >
                 <Sparkles className="w-4 h-4" />
-                Generate
+                {isGenerating ? 'Generating...' : 'Generate'}
               </Button>
             </div>
 
