@@ -202,21 +202,21 @@ export function CollaborativeCloset() {
   );
 
   return (
-    <Card className="w-full">
-      <CardHeader className="space-y-1">
-        <div className="flex justify-between items-center">
+    <Card className="w-full max-w-4xl mx-auto p-4 sm:p-6">
+      <CardHeader className="px-0 pb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold">Your Closet</h2>
-            <p className="text-sm text-muted-foreground">
+            <CardTitle className="text-xl sm:text-2xl">Your Closet</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
               Add and manage your fashion items
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Button 
               variant="outline" 
               size="sm"
               onClick={handleAddFromTryOn}
-              className="flex items-center gap-2"
+              className="flex-1 sm:flex-none flex items-center gap-2"
             >
               <ShoppingBag className="w-4 h-4" />
               Import from TryOn
@@ -225,7 +225,7 @@ export function CollaborativeCloset() {
               variant="outline" 
               size="sm"
               onClick={() => setShowAddDialog(true)}
-              className="flex items-center gap-2"
+              className="flex-1 sm:flex-none flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
               Add Items
@@ -233,12 +233,12 @@ export function CollaborativeCloset() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-0">
         {closetItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <ShoppingBag className="w-12 h-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Your closet is empty</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-4 max-w-sm">
               Start adding items to your collaborative closet
             </p>
             <Button 
@@ -251,25 +251,25 @@ export function CollaborativeCloset() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {closetItems.map((item) => (
               <div 
                 key={item.id} 
-                className="relative group aspect-square rounded-lg overflow-hidden cursor-pointer"
+                className="relative group aspect-square rounded-lg overflow-hidden cursor-pointer border"
                 onClick={() => setSelectedItem(item)}
               >
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,clothing';
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <h3 className="text-white font-medium">{item.name}</h3>
-                    <p className="text-white/80 text-sm">{item.category}</p>
+                    <h3 className="text-white font-medium truncate">{item.name}</h3>
+                    <p className="text-white/80 text-sm truncate">{item.brand}</p>
                   </div>
                 </div>
               </div>
@@ -280,7 +280,7 @@ export function CollaborativeCloset() {
         {/* TryOn Import Dialog */}
         {showTryOnDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-background p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="bg-background p-4 sm:p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Select Items to Import from TryOn</h3>
                 <Button 
@@ -294,7 +294,7 @@ export function CollaborativeCloset() {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
                 {tryOnItems.map((item) => (
                   <div 
                     key={item.id}
@@ -306,16 +306,16 @@ export function CollaborativeCloset() {
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,clothing';
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <h3 className="text-white font-medium">{item.name}</h3>
-                        <p className="text-white/80 text-sm">{item.brand}</p>
-                        <p className="text-white/80 text-sm">{item.price}</p>
+                        <h3 className="text-white font-medium truncate">{item.name}</h3>
+                        <p className="text-white/80 text-sm truncate">{item.brand}</p>
+                        <p className="text-white/80 text-sm truncate">{item.price}</p>
                       </div>
                     </div>
                   </div>
@@ -345,7 +345,7 @@ export function CollaborativeCloset() {
         {/* Add Item Dialog */}
         {showAddDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-background p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="bg-background p-4 sm:p-6 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Select an Item to Add</h3>
                 <Button 
@@ -356,7 +356,7 @@ export function CollaborativeCloset() {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                 {mockItems.map((item) => (
                   <div 
                     key={item.id}
@@ -366,16 +366,16 @@ export function CollaborativeCloset() {
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,clothing';
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="absolute bottom-0 left-0 right-0 p-3">
-                        <h3 className="text-white font-medium">{item.name}</h3>
-                        <p className="text-white/80 text-sm">{item.brand}</p>
-                        <p className="text-white/80 text-sm">{item.price}</p>
+                        <h3 className="text-white font-medium truncate">{item.name}</h3>
+                        <p className="text-white/80 text-sm truncate">{item.brand}</p>
+                        <p className="text-white/80 text-sm truncate">{item.price}</p>
                       </div>
                     </div>
                   </div>
@@ -388,112 +388,77 @@ export function CollaborativeCloset() {
         {/* Item Details */}
         {selectedItem && (
           <div className="mt-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{selectedItem.name}</h3>
-              <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <h3 className="text-lg font-semibold truncate">{selectedItem.name}</h3>
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={handleShare}
-                  className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                  className="flex-1 sm:flex-none flex items-center gap-2"
                 >
-                  <Share2 className="w-4 h-4 mr-1" />
+                  <Share2 className="w-4 h-4" />
                   Share
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant="destructive" 
                   size="sm"
                   onClick={() => handleRemoveItem(selectedItem.id)}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  className="flex-1 sm:flex-none flex items-center gap-2"
                 >
-                  <Trash2 className="w-4 h-4 mr-1" />
+                  <Trash2 className="w-4 h-4" />
                   Remove
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setSelectedItem(null)}
-                >
-                  <X className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="relative aspect-square rounded-lg overflow-hidden">
-                <img
-                  src={selectedItem.image}
-                  alt={selectedItem.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = 'https://source.unsplash.com/random/300x400/?fashion,clothing';
-                  }}
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Brand</p>
+                <p className="font-medium">{selectedItem.brand}</p>
               </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium">Brand</h4>
-                  <p className="text-muted-foreground">{selectedItem.brand}</p>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Price</p>
+                <p className="font-medium">{selectedItem.price}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Tags</p>
+              <div className="flex flex-wrap gap-2">
+                {selectedItem.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Emotions</p>
+              <div className="flex flex-wrap gap-2">
+                {selectedItem.emotions.map((emotion) => (
+                  <Badge key={emotion} variant="outline">
+                    {emotion}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Rating</p>
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${
+                        i < Math.floor(selectedItem.rating)
+                          ? 'text-yellow-400 fill-yellow-400'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
+                  ))}
                 </div>
-                
-                <div>
-                  <h4 className="font-medium">Category</h4>
-                  <p className="text-muted-foreground">{selectedItem.category}</p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium">Price</h4>
-                  <p className="text-muted-foreground">{selectedItem.price}</p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium">Rating</h4>
-                  <div className="flex items-center gap-2">
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => handleRating(star)}
-                          className="focus:outline-none"
-                        >
-                          <Star
-                            className={`w-5 h-5 ${
-                              star <= (userRating || selectedItem.rating)
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        </button>
-                      ))}
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      ({selectedItem.ratingCount} ratings)
-                    </span>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium">Emotions</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedItem.emotions.map((emotion) => (
-                      <Badge key={emotion} variant="secondary">
-                        {emotion}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium">Tags</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedItem.tags?.map((tag) => (
-                      <Badge key={tag} variant="outline">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                <span className="text-sm text-muted-foreground">
+                  ({selectedItem.ratingCount} reviews)
+                </span>
               </div>
             </div>
           </div>
