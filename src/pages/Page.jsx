@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Textarea } from '@/components/ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { db } from "@/configs/firebase";
+import {  collection, query, where, getDocs } from 'firebase/firestore';
 import { AlertCircle } from 'lucide-react';
 import { 
   Home, 
@@ -43,7 +45,55 @@ export default function SocialMediaApp() {
   });
   const [likedPosts, setLikedPosts] = useState({});
   const [bookmarkedPosts, setBookmarkedPosts] = useState({});
-  const [posts, setPosts] = useState([
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const snapshot = await getDocs(collection(db, 'post'))
+        // Transform each Firestore document into your "post" shape
+        const fetchedPosts = snapshot.docs.map((doc, idx) => {
+          const data = doc.data()
+          return {
+            // Use doc.id or some unique key for `id`
+            id: doc.id,
+            
+            // You don't have username in Firestore, so fill with a placeholder
+            username: `user_${idx + 1}`,
+            
+            // fullName is also missing, so just insert random or static
+            fullName: `Full Name ${idx + 1}`,
+            
+            // For avatar, pick a static or random placeholder
+            avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
+            
+            // Firestore "description" → old "content"
+            content: data.description || 'No description',
+            
+            // Firestore "imageUrls" → old "image"
+            // If multiple URLs, pick first, or default if none
+            image: data.imageUrls?.[0] || 'https://placehold.co/800x500',
+            
+            // Firestore doesn't have "likes"/"comments", so set placeholders
+            likes: 42,
+            comments: 7,
+
+            // Firestore has "createdAt" → old "time" 
+            // You might do something like "2h", or parse the date
+            time: data.createdAt
+              ? 'Just now' // or parse how long ago
+              : 'Just now'
+          }
+        })
+        
+        setPosts(fetchedPosts)
+      } catch (error) {
+        console.error('Error fetching posts:', error)
+      }
+    }
+
+    fetchData()
+  }, [])
+  /* const [posts, setPosts] = useState([
     {
       id: 1,
       username: 'sarah_designs',
@@ -77,7 +127,7 @@ export default function SocialMediaApp() {
       comments: 36,
       time: '6h'
     }
-  ]);
+  ]); */
   
   // Comment state
   const [comments, setComments] = useState({
